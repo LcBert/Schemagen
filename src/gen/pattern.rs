@@ -1,44 +1,111 @@
-//! Template-based string pattern generator.
+//! Customizable template-based string pattern generator.
 
-use rand::{Rng, RngExt};
+use std::{collections::HashMap, ops::RangeInclusive, sync::Arc};
+
+use rand::{Rng, seq::IndexedRandom};
 
 use crate::value::{Generator, Value};
 
-/// Generator producing strings by substituting placeholders in a template.
+enum Step {
+    Literal(char),
+    Pool(Arc<[char]>),
+}
+
+/// Generator producing strings by substituting configurable placeholder characters in a template.
 ///
-/// - `'#'` -> random digit (`'0'..='9'`)
-/// - `'?'` -> random uppercase ASCII letter (`'A'..='Z'`)
-/// - Other characters are kept unchanged.
+/// Placeholders are configured using [`Pattern::add_entry`]. Any character without a configured
+/// entry is preserved verbatim.
 pub struct Pattern {
     template: String,
+    rules: HashMap<char, Vec<char>>,
+    compiled: Option<Vec<Step>>,
 }
 
 impl Pattern {
-    /// Creates a new [`Pattern`] generator with the specified template string.
+    /// Creates a new [`Pattern`] generator with the specified template string and no placeholder rules.
     pub fn new(template: impl Into<String>) -> Self {
         Self {
             template: template.into(),
+            rules: HashMap::new(),
+            compiled: None,
         }
+    }
+
+    /// Registers allowed character ranges for a specific placeholder character.
+    ///
+    /// # Errors
+    ///
+    /// Returns `Err(String)` if `ranges` is empty or contains a wrong `RangeInclusive<char>`.
+    pub fn add_entry(
+        mut self,
+        placeholder: char,
+        ranges: Vec<RangeInclusive<char>>,
+    ) -> Result<Self, String> {
+        if ranges.is_empty() {
+            return Err(format!(
+                "Ranges for placeholder '{placeholder}' cannot be empty"
+            ));
+        }
+
+        let mut char_pool = Vec::new();
+        for r in ranges {
+            if r.is_empty() {
+                return Err(format!(
+                    "Range not valid for '{placeholder}': '{}'..='{}'",
+                    r.start(),
+                    r.end()
+                ));
+            }
+            for ch in r {
+                char_pool.push(ch);
+            }
+        }
+
+        self.rules.insert(placeholder, char_pool);
+        self.compiled = None;
+        Ok(self)
+    }
+
+    fn compile(&mut self) {
+        let pools: HashMap<char, Arc<[char]>> = self
+            .rules
+            .iter()
+            .map(|(&k, v)| (k, Arc::from(v.as_slice())))
+            .collect();
+
+        let steps: Vec<Step> = self
+            .template
+            .chars()
+            .map(|ch| match pools.get(&ch) {
+                Some(pool) => Step::Pool(Arc::clone(pool)),
+                None => Step::Literal(ch),
+            })
+            .collect();
+
+        self.compiled = Some(steps);
     }
 }
 
-
 impl Generator for Pattern {
     fn next_value(&mut self, rng: &mut dyn Rng) -> Value {
-        let mut result: String = String::with_capacity(self.template.len());
-        for ch in self.template.chars() {
-            match ch {
-                '#' => {
-                    let digit: u8 = rng.random_range(b'0'..=b'9');
-                    result.push(digit as char);
+        if self.compiled.is_none() {
+            self.compile();
+        }
+
+        let steps = self.compiled.as_ref().unwrap();
+        let mut result = String::with_capacity(self.template.len());
+
+        for step in steps {
+            match step {
+                Step::Literal(c) => result.push(*c),
+                Step::Pool(pool) => {
+                    if let Some(&ch) = pool.choose(rng) {
+                        result.push(ch);
+                    }
                 }
-                '?' => {
-                    let digit: u8 = rng.random_range(b'A'..=b'Z');
-                    result.push(digit as char);
-                }
-                other => result.push(other),
             }
         }
+
         Value::Text(result)
     }
 }
@@ -53,7 +120,11 @@ mod tests {
     fn test() {
         let mut rng = StdRng::seed_from_u64(45);
         let template = "USR-####-??";
-        let mut generator = Pattern::new(template);
+        let mut generator = Pattern::new(template)
+            .add_entry('#', vec!['0'..='9'])
+            .unwrap()
+            .add_entry('?', vec!['A'..='Z'])
+            .unwrap();
 
         for _ in 0..10000 {
             match generator.next_value(&mut rng) {

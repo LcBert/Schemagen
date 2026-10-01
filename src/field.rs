@@ -28,11 +28,10 @@ impl Field {
         RangeFloat::new(min, max, decimals)
     }
 
-    /// Creates a template-based string generator.
+    /// Creates a customizable template-based string generator.
     ///
-    /// - `'#'` is replaced with a random digit (`'0'..='9'`).
-    /// - `'?'` is replaced with a random uppercase letter (`'A'..='Z'`).
-    /// - All other characters are preserved literally.
+    /// Placeholders and their allowed character ranges can be configured using
+    /// [`Pattern::add_entry`].
     pub fn pattern(template: impl Into<String>) -> Pattern {
         Pattern::new(template)
     }
@@ -66,4 +65,3 @@ impl Field {
         SequentialFloat::new(current, step, decimals)
     }
 }
-
