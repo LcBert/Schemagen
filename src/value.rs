@@ -2,6 +2,7 @@
 
 use rand::Rng;
 use serde::Serialize;
+use uuid::Uuid;
 
 /// Represents a generated value of a supported primitive or text type.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -15,6 +16,8 @@ pub enum Value {
     Text(String),
     /// Boolean value.
     Boolean(bool),
+    /// Uuid value.
+    Uuid(Uuid),
 }
 
 impl Value {
@@ -30,6 +33,7 @@ impl Value {
                     "FALSE".to_string()
                 }
             }
+            Value::Uuid(v) => v.to_string(),
         }
     }
 }
@@ -41,6 +45,7 @@ impl std::fmt::Display for Value {
             Value::Float(v) => write!(f, "{v}"),
             Value::Text(v) => write!(f, "{v}"),
             Value::Boolean(v) => write!(f, "{v}"),
+            Value::Uuid(v) => write!(f, "{v}"),
         }
     }
 }

@@ -1,8 +1,14 @@
 //! Field factory functions for instantiating generators.
 
 use crate::r#gen::{
-    check::Check, choice::Choice, pattern::Pattern, range_float::RangeFloat, range_int::RangeInt,
-    sequential::Sequential, sequential_float::SequentialFloat,
+    check::Check,
+    choice::Choice,
+    pattern::Pattern,
+    range_float::RangeFloat,
+    range_int::RangeInt,
+    sequential::Sequential,
+    sequential_float::SequentialFloat,
+    uuid_gen::{UuidGen, UuidVersion},
 };
 
 /// Factory utility for constructing data generators.
@@ -63,5 +69,10 @@ impl Field {
     /// optionally rounded to `decimals` decimal places.
     pub fn sequential_float(current: f64, step: f64, decimals: Option<u32>) -> SequentialFloat {
         SequentialFloat::new(current, step, decimals)
+    }
+
+    /// Creates a random uuid v4
+    pub fn uuid_v4(version: UuidVersion) -> UuidGen {
+        UuidGen::new(version)
     }
 }

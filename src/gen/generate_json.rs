@@ -1,4 +1,4 @@
-use schemagen::{field::Field, r#gen::uuid_gen::UuidVersion, schema::Schema};
+use schemagen::{field::Field, schema::Schema};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define all Fields for the generator
@@ -18,9 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let check = Field::check();
 
-    let uuid_v4 = Field::uuid_v4(UuidVersion::V4);
-
-    let uuid_v7 = Field::uuid_v4(UuidVersion::V7);
+    let uuid_v4 = Field::uuid_v4();
 
     // Fill Schema with desired Fields
     let mut schema = Schema::new()
@@ -32,8 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_field("pattern", pattern)
         .add_field("choice", choice)
         .add_field("check", check)
-        .add_field("uuid_v4", uuid_v4)
-        .add_field("uuid_v7", uuid_v7);
+        .add_field("uuid", uuid_v4);
 
     // Generate json
     let generated = schema.generate_json(100)?;
