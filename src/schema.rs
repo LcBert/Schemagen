@@ -180,6 +180,39 @@ impl Schema {
         writer.flush()?;
         Ok(())
     }
+
+    pub fn write_sql<P: AsRef<Path>>(
+        &mut self,
+        table_name: &str,
+        path: P,
+        count: usize,
+    ) -> io::Result<()> {
+        let final_path = ensure_extension(path, "sql");
+        let file = File::create(final_path)?;
+        let mut writer = BufWriter::new(file);
+
+        let headers: Vec<String> = self.fields.iter().map(|(name, _)| name.clone()).collect();
+
+        let columns = headers.join(",");
+
+        for row in self.iter(count) {
+            let mut values: Vec<String> = Vec::new();
+            for header in &headers {
+                if let Some(val) = row.get(header) {
+                    values.push(val.to_sql());
+                }
+            }
+
+            writeln!(
+                writer,
+                "INSERT INTO {table_name} ({columns}) VALUES ({});",
+                values.join(",")
+            )?;
+        }
+
+        writer.flush()?;
+        Ok(())
+    }
 }
 
 fn ensure_extension<P: AsRef<Path>>(path: P, expected_ext: &str) -> PathBuf {
@@ -189,4 +222,3 @@ fn ensure_extension<P: AsRef<Path>>(path: P, expected_ext: &str) -> PathBuf {
         _ => path.with_extension(expected_ext),
     }
 }
-

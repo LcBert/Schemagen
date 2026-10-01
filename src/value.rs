@@ -17,6 +17,23 @@ pub enum Value {
     Boolean(bool),
 }
 
+impl Value {
+    pub fn to_sql(&self) -> String {
+        match self {
+            Value::Int(v) => v.to_string(),
+            Value::Float(v) => v.to_string(),
+            Value::Text(v) => format!("'{}'", v.replace('\'', "''")),
+            Value::Boolean(v) => {
+                if *v {
+                    "TRUE".to_string()
+                } else {
+                    "FALSE".to_string()
+                }
+            }
+        }
+    }
+}
+
 impl std::fmt::Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -33,4 +50,3 @@ pub trait Generator {
     /// Produces the next generated [`Value`] using the provided random number generator.
     fn next_value(&mut self, rng: &mut dyn Rng) -> Value;
 }
-
