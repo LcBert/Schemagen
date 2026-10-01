@@ -18,9 +18,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let check = Field::check();
 
-    let uuid_v4 = Field::uuid_v4(UuidVersion::V4);
+    let uuid_v4 = Field::uuid(UuidVersion::V4);
 
-    let uuid_v7 = Field::uuid_v4(UuidVersion::V7);
+    let uuid_v7 = Field::uuid(UuidVersion::V7);
+
+    let datetime = Field::datetime(
+        "2024-01-01 00:00:00",
+        "2024-12-31 23:59:59",
+        "%Y-%m-%d %H:%M:%S",
+    );
+
+    let date = Field::date("2024-01-01", "2024-12-31");
+
+    let time = Field::time("00:00:00", "23:59:59");
 
     // Fill Schema with desired Fields
     let mut schema = Schema::new()
@@ -33,10 +43,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_field("choice", choice)
         .add_field("check", check)
         .add_field("uuid_v4", uuid_v4)
-        .add_field("uuid_v7", uuid_v7);
+        .add_field("uuid_v7", uuid_v7)
+        .add_field("datetime", datetime)
+        .add_field("date", date)
+        .add_field("time", time);
 
     // Generate json
-    let generated = schema.generate_json(100)?;
+    let generated = schema.generate_json(1)?;
     print!("{generated}");
 
     Ok(())

@@ -3,6 +3,7 @@
 use crate::r#gen::{
     check::Check,
     choice::Choice,
+    datetime::Datetime,
     pattern::Pattern,
     range_float::RangeFloat,
     range_int::RangeInt,
@@ -71,8 +72,46 @@ impl Field {
         SequentialFloat::new(current, step, decimals)
     }
 
-    /// Creates a random uuid v4
-    pub fn uuid_v4(version: UuidVersion) -> UuidGen {
+    /// Creates a UUID generator for the specified [`UuidVersion`].
+    pub fn uuid(version: UuidVersion) -> UuidGen {
         UuidGen::new(version)
+    }
+
+    /// Creates a random UUID v4 generator.
+    pub fn uuid_v4() -> UuidGen {
+        UuidGen::new(UuidVersion::V4)
+    }
+
+    /// Creates a time-ordered UUID v7 generator.
+    pub fn uuid_v7() -> UuidGen {
+        UuidGen::new(UuidVersion::V7)
+    }
+
+    /// Creates a random date, time, or datetime generator matching the provided format string.
+    ///
+    /// Automatically detects whether the input corresponds to:
+    /// - Date and time (e.g. `start: "2024-01-01 00:00:00"`, `end: "2024-12-31 23:59:59"`, `format: "%Y-%m-%d %H:%M:%S"`)
+    /// - Date only (e.g. `start: "2024-01-01"`, `end: "2024-12-31"`, `format: "%Y-%m-%d"`)
+    /// - Time only (e.g. `start: "08:00:00"`, `end: "18:00:00"`, `format: "%H:%M:%S"`)
+    ///
+    /// # Panics
+    ///
+    /// Panics if `start` or `end` cannot be parsed with `date_format`, or if `start > end`.
+    pub fn datetime(
+        start: impl AsRef<str>,
+        end: impl AsRef<str>,
+        date_format: &'static str,
+    ) -> Datetime {
+        Datetime::new(start, end, date_format)
+    }
+
+    /// Creates a random date generator using the default format `"%Y-%m-%d"`.
+    pub fn date(start: impl AsRef<str>, end: impl AsRef<str>) -> Datetime {
+        Datetime::new(start, end, "%Y-%m-%d")
+    }
+
+    /// Creates a random time generator using the default format `"%H:%M:%S"`.
+    pub fn time(start: impl AsRef<str>, end: impl AsRef<str>) -> Datetime {
+        Datetime::new(start, end, "%H:%M:%S")
     }
 }

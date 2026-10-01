@@ -8,6 +8,7 @@ use uuid::Uuid;
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum Value {
+    None,
     /// 64-bit signed integer.
     Int(i64),
     /// 64-bit floating point number.
@@ -23,6 +24,7 @@ pub enum Value {
 impl Value {
     pub fn to_sql(&self) -> String {
         match self {
+            Value::None => "NULL".to_string(),
             Value::Int(v) => v.to_string(),
             Value::Float(v) => v.to_string(),
             Value::Text(v) => format!("'{}'", v.replace('\'', "''")),
@@ -33,14 +35,16 @@ impl Value {
                     "FALSE".to_string()
                 }
             }
-            Value::Uuid(v) => v.to_string(),
+            Value::Uuid(v) => format!("'{v}'"),
         }
     }
+
 }
 
 impl std::fmt::Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Value::None => write!(f, "None"),
             Value::Int(v) => write!(f, "{v}"),
             Value::Float(v) => write!(f, "{v}"),
             Value::Text(v) => write!(f, "{v}"),
