@@ -2,6 +2,16 @@
 name = "schemagen"
 version = "0.1.0"
 edition = "2024"
+authors = ["LcBert <luca.bertaggia82@gmail.com>"]
+description = "A fast and flexible fake/mock data generator library for Rust with JSON, JSONL, and CSV export support."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/LcBert/schemagen"
+homepage = "https://github.com/LcBert/schemagen"
+documentation = "https://docs.rs/schemagen"
+readme = "README.md"
+keywords = ["mock", "fake-data", "generator", "schema", "test-data"]
+categories = ["development-tools::testing", "encoding"]
+
 
 [dependencies]
 indexmap = { version = "2.14.2", features = ["serde"] }
