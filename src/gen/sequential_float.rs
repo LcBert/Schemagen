@@ -1,5 +1,9 @@
+//! Sequential floating-point generator.
+
 use crate::value::{Generator, Value};
 
+/// Generator producing floating-point sequences advancing by a fixed step on each generation,
+/// optionally rounded to a specific number of decimal places.
 pub struct SequentialFloat {
     current: f64,
     step: f64,
@@ -7,6 +11,8 @@ pub struct SequentialFloat {
 }
 
 impl SequentialFloat {
+    /// Creates a new [`SequentialFloat`] generator starting at `current` with increment `step`,
+    /// optionally rounding to `decimals` decimal places.
     pub fn new(current: f64, step: f64, decimals: Option<u32>) -> Self {
         Self {
             current,
@@ -15,6 +21,7 @@ impl SequentialFloat {
         }
     }
 }
+
 
 impl Generator for SequentialFloat {
     fn next_value(&mut self, _rng: &mut dyn rand::prelude::Rng) -> Value {

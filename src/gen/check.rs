@@ -1,14 +1,20 @@
+//! Boolean check generator.
+
 use rand::RngExt;
 
 use crate::value::{Generator, Value};
 
+/// Generator producing random boolean values (`true` or `false`) with a 50/50 distribution.
+#[derive(Default)]
 pub struct Check {}
 
 impl Check {
+    /// Creates a new [`Check`] generator.
     pub fn new() -> Self {
         Self {}
     }
 }
+
 
 impl Generator for Check {
     fn next_value(&mut self, rng: &mut dyn rand::prelude::Rng) -> Value {

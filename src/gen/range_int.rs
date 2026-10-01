@@ -1,13 +1,21 @@
+//! Integer range generator.
+
 use rand::RngExt;
 
 use crate::value::{Generator, Value};
 
+/// Generator producing uniform random integers in the range `[min, max]`.
 pub struct RangeInt {
     min: i64,
     max: i64,
 }
 
 impl RangeInt {
+    /// Creates a new [`RangeInt`] generator.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `min > max`.
     pub fn new(min: i64, max: i64) -> Self {
         assert!(min <= max, "min must be <= max");
         Self { min, max }
@@ -19,6 +27,7 @@ impl Generator for RangeInt {
         Value::Int(rng.random_range(self.min..=self.max))
     }
 }
+
 
 #[cfg(test)]
 mod tests {

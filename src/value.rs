@@ -1,12 +1,19 @@
+//! Core data types and generator abstraction.
+
 use rand::Rng;
 use serde::Serialize;
 
+/// Represents a generated value of a supported primitive or text type.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum Value {
+    /// 64-bit signed integer.
     Int(i64),
+    /// 64-bit floating point number.
     Float(f64),
+    /// UTF-8 text string.
     Text(String),
+    /// Boolean value.
     Boolean(bool),
 }
 
@@ -21,6 +28,9 @@ impl std::fmt::Display for Value {
     }
 }
 
+/// Trait implemented by all data generators.
 pub trait Generator {
+    /// Produces the next generated [`Value`] using the provided random number generator.
     fn next_value(&mut self, rng: &mut dyn Rng) -> Value;
 }
+

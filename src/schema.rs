@@ -1,3 +1,5 @@
+//! Schema builder and data generator engine.
+
 use std::{
     fs::File,
     io::{self, BufWriter, Write},
@@ -9,6 +11,7 @@ use rand::{Rng, SeedableRng, rngs::StdRng};
 
 use crate::value::{Generator, Value};
 
+/// Streaming iterator yielding generated rows as [`IndexMap<String, Value>`].
 pub struct SchemaIter<'a> {
     fields: &'a mut [(String, Box<dyn Generator>)],
     rng: Box<dyn Rng>,
@@ -40,12 +43,14 @@ impl<'a> Iterator for SchemaIter<'a> {
 
 impl ExactSizeIterator for SchemaIter<'_> {}
 
+/// Schema definition containing fields and generation configuration.
 pub struct Schema {
     fields: Vec<(String, Box<dyn Generator>)>,
     seed: Option<u64>,
 }
 
 impl Schema {
+    /// Creates a new, empty [`Schema`].
     pub fn new() -> Self {
         Self {
             fields: Vec::new(),
@@ -53,11 +58,13 @@ impl Schema {
         }
     }
 
+    /// Sets a fixed random seed for reproducible data generation.
     pub fn with_seed(mut self, seed: u64) -> Self {
         self.seed = Some(seed);
         self
     }
 
+    /// Adds a named field with its corresponding [`Generator`].
     pub fn add_field<G: Generator + 'static>(
         mut self,
         name: impl Into<String>,
@@ -67,6 +74,7 @@ impl Schema {
         self
     }
 
+    /// Generates a batch of `count` rows in memory as a `Vec<IndexMap<String, Value>>`.
     pub fn generate_batch(&mut self, count: usize) -> Vec<IndexMap<String, Value>> {
         let mut rows = Vec::with_capacity(count);
 
@@ -96,6 +104,7 @@ impl Schema {
         }
     }
 
+    /// Returns a streaming [`SchemaIter`] that lazily produces `count` rows without collecting them all in memory.
     pub fn iter(&mut self, count: usize) -> SchemaIter<'_> {
         let rng: Box<dyn Rng> = match self.seed {
             Some(seed) => Box::new(StdRng::seed_from_u64(seed)),
@@ -109,11 +118,15 @@ impl Schema {
         }
     }
 
+    /// Generates a pretty-formatted JSON string array containing `count` records.
     pub fn generate_json(&mut self, count: usize) -> Result<String, serde_json::Error> {
         let rows = self.generate_batch(count);
         serde_json::to_string_pretty(&rows)
     }
 
+    /// Streams `count` records directly into a JSON Lines (`.jsonl`) file at `path`.
+    ///
+    /// Automatically appends the `.jsonl` extension if not present.
     pub fn write_jsonl<P: AsRef<Path>>(&mut self, path: P, count: usize) -> io::Result<()> {
         let final_path = ensure_extension(path, "jsonl");
         let file = File::create(final_path)?;
@@ -129,6 +142,10 @@ impl Schema {
         Ok(())
     }
 
+    /// Streams `count` records directly into a CSV file at `path`.
+    ///
+    /// If `export_headers` is `true`, writes the field names as the first line.
+    /// Automatically appends the `.csv` extension if not present.
     pub fn write_csv<P: AsRef<Path>>(
         &mut self,
         path: P,
@@ -172,3 +189,4 @@ fn ensure_extension<P: AsRef<Path>>(path: P, expected_ext: &str) -> PathBuf {
         _ => path.with_extension(expected_ext),
     }
 }
+

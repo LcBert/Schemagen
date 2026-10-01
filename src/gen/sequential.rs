@@ -1,15 +1,20 @@
+//! Sequential integer generator.
+
 use crate::value::{Generator, Value};
 
+/// Generator producing integer sequences advancing by a fixed step on each generation.
 pub struct Sequential {
     current: i64,
     step: i64,
 }
 
 impl Sequential {
+    /// Creates a new [`Sequential`] generator starting at `current` with increment `step`.
     pub fn new(current: i64, step: i64) -> Self {
         Self { current, step }
     }
 }
+
 
 impl Generator for Sequential {
     fn next_value(&mut self, _rng: &mut dyn rand::prelude::Rng) -> Value {

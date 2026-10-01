@@ -1,17 +1,26 @@
+//! Random discrete choice generator.
+
 use rand::seq::IndexedRandom;
 
 use crate::value::{Generator, Value};
 
+/// Generator selecting a random string from a list of predefined options.
 pub struct Choice {
     options: Vec<String>,
 }
 
 impl Choice {
+    /// Creates a new [`Choice`] generator with the provided options.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `options` is empty.
     pub fn new(options: Vec<String>) -> Self {
         assert!(!options.is_empty(), "Options cannot be empty");
         Self { options }
     }
 }
+
 
 impl Generator for Choice {
     fn next_value(&mut self, rng: &mut dyn rand::prelude::Rng) -> Value {

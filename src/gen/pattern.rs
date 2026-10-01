@@ -1,18 +1,27 @@
+//! Template-based string pattern generator.
+
 use rand::{Rng, RngExt};
 
 use crate::value::{Generator, Value};
 
+/// Generator producing strings by substituting placeholders in a template.
+///
+/// - `'#'` -> random digit (`'0'..='9'`)
+/// - `'?'` -> random uppercase ASCII letter (`'A'..='Z'`)
+/// - Other characters are kept unchanged.
 pub struct Pattern {
     template: String,
 }
 
 impl Pattern {
+    /// Creates a new [`Pattern`] generator with the specified template string.
     pub fn new(template: impl Into<String>) -> Self {
         Self {
             template: template.into(),
         }
     }
 }
+
 
 impl Generator for Pattern {
     fn next_value(&mut self, rng: &mut dyn Rng) -> Value {

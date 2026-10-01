@@ -1,7 +1,11 @@
+//! Floating-point range generator.
+
 use rand::RngExt;
 
 use crate::value::{Generator, Value};
 
+/// Generator producing uniform random floating-point numbers in the range `[min, max]`,
+/// optionally rounded to a specific number of decimal places.
 pub struct RangeFloat {
     min: f64,
     max: f64,
@@ -9,6 +13,11 @@ pub struct RangeFloat {
 }
 
 impl RangeFloat {
+    /// Creates a new [`RangeFloat`] generator.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `min > max`.
     pub fn new(min: f64, max: f64, decimals: Option<u32>) -> Self {
         assert!(min <= max, "min must be <= max");
         Self { min, max, decimals }
@@ -28,6 +37,7 @@ impl Generator for RangeFloat {
         Value::Float(final_val)
     }
 }
+
 
 #[cfg(test)]
 mod tests {
