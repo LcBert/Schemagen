@@ -16,8 +16,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let generated = schema.generate_json(100)?;
     print!("{generated}");
-    // schema.write_jsonl("products", 10)?;
-    // schema.write_csv("products", 10, true)?;
 
     Ok(())
 }
