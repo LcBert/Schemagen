@@ -1,10 +1,10 @@
 //! Field factory functions for instantiating generators.
 
 use crate::{
-    r#gen::{
+    generators::{
+        array::Array,
         check::Check,
         choice::Choice,
-        array::Array,
         datetime::Datetime,
         object_gen::ObjectGen,
         optional_null::OptionalNull,
@@ -31,7 +31,7 @@ use crate::{
 ///
 /// let mut schema = Schema::new()
 ///     .add_field("id", Field::sequential(1, 1))
-///     .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']).unwrap())
+///     .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']))
 ///     .add_field("price", Field::range_float(1.0, 100.0, Some(2)));
 /// ```
 pub struct Field;
@@ -74,7 +74,7 @@ impl Field {
     /// * `template` - The template string with placeholder characters.
     ///
     /// Placeholders and their allowed character ranges can be configured using
-    /// [`Pattern::add_entry`](crate::gen::pattern::Pattern::add_entry).
+    /// [`Pattern::add_entry`](crate::generators::pattern::Pattern::add_entry).
     pub fn pattern(template: impl Into<String>) -> Pattern {
         Pattern::new(template)
     }
@@ -177,7 +177,7 @@ impl Field {
     ///
     /// Panics if `start` or `end` cannot be parsed, or if `start > end`.
     pub fn date(start: impl Into<String>, end: impl Into<String>) -> Datetime {
-        Datetime::new(start, end, "%Y-%m-%d")
+        Field::datetime(start, end, "%Y-%m-%d")
     }
 
     /// Creates a random time generator using the default format `"%H:%M:%S"`.
@@ -191,7 +191,7 @@ impl Field {
     ///
     /// Panics if `start` or `end` cannot be parsed, or if `start > end`.
     pub fn time(start: impl Into<String>, end: impl Into<String>) -> Datetime {
-        Datetime::new(start, end, "%H:%M:%S")
+        Field::datetime(start, end, "%H:%M:%S")
     }
 
     /// Creates a generator that wraps another generator and produces `NULL` values with a configurable probability.
@@ -224,5 +224,9 @@ impl Field {
 
     pub fn object() -> ObjectGen {
         ObjectGen::new()
+    }
+
+    pub fn email() -> Pattern {
+        Field::pattern("user???@example.com").add_entry('?', vec!['0'..='9'])
     }
 }

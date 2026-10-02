@@ -1,4 +1,4 @@
-use schemagen::{field::Field, r#gen::uuid_gen::UuidVersion, schema::Schema};
+use schemagen::{field::Field, generators::uuid_gen::UuidVersion, schema::Schema};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define all Fields for the generator
@@ -11,8 +11,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let range_float = Field::range_float(1.0, 100.0, Some(2));
 
     let pattern = Field::pattern("PRD-####-????")
-        .add_entry('#', vec!['1'..='9'])?
-        .add_entry('?', vec!['a'..='z', 'A'..='Z'])?;
+        .add_entry('#', vec!['1'..='9'])
+        .add_entry('?', vec!['a'..='z', 'A'..='Z']);
 
     let choice = Field::choice(vec!["Prod1", "Prod2", "Prod3", "Prod4", "Prod5"]);
 
@@ -37,19 +37,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let array = Field::array()
         .add_generator(Field::range_int(1, 10))
         .add_generator(Field::range_float(1.0, 10.0, Some(2)))
-        .add_generator(Field::pattern("ABC-##").add_entry('#', vec!['0'..='9'])?);
+        .add_generator(Field::pattern("ABC-##").add_entry('#', vec!['0'..='9']));
 
     let object = Field::object()
         .add_field("field1", Field::range_int(1, 10))
         .add_field("field2", Field::range_float(1.0, 10.0, Some(2)))
         .add_field(
             "field3",
-            Field::pattern("ABC-##").add_entry('#', vec!['0'..='9'])?,
+            Field::pattern("ABC-##").add_entry('#', vec!['0'..='9']),
         );
+
+    let email = Field::email();
 
     // Fill Schema with desired Fields
     let mut schema = Schema::new()
-        .with_seed(12345)
+        // .with_seed(12345)
         .add_field("sequential", sequential)
         .add_field("sequential_float", sequential_float)
         .add_field("int", range_int)
@@ -64,7 +66,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_field("time", time)
         .add_field("optional_int", optional_int)
         .add_field("array", array)
-        .add_field("object", object);
+        .add_field("object", object)
+        .add_field("email", email);
 
     // Generate json
     let generated = schema.generate_json(10)?;

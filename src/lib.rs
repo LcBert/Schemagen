@@ -11,7 +11,7 @@
 //! let mut schema = Schema::new()
 //!     .with_seed(12345)
 //!     .add_field("id", Field::sequential(1, 1))
-//!     .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']).unwrap())
+//!     .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']))
 //!     .add_field("price", Field::range_float(1.0, 100.0, Some(2)));
 //!
 //! // Generate JSON
@@ -20,6 +20,7 @@
 //! // Or export directly to files
 //! schema.write_jsonl("output", 100)?;
 //! schema.write_csv("output", 100, true)?;
+//! schema.write_sql("table_name", "output", 100)?;
 //! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 //!
@@ -36,6 +37,8 @@
 //!   - `uuid`: UUID v4 (random) or v7 (time-ordered) generation
 //!   - `datetime` / `date` / `time`: Random date/time generation with custom formats
 //!   - `optional_null`: Wrap any generator to produce NULL values with configurable probability
+//!   - `array`: Combine multiple generators to produce PostgreSQL ARRAY values
+//!   - `object`: Generate JSON-like objects with named fields (compatible with JSONB/JSON columns)
 //! - **Streaming & Exporting**:
 //!   - In-memory batch generation (`generate_batch`, `generate_json`)
 //!   - Streaming iterator (`iter`)
@@ -43,7 +46,6 @@
 //! - **Reproducibility**: Set seeds via `.with_seed(seed)` for deterministic output
 
 pub mod field;
-pub mod r#gen;
+pub mod generators;
 pub mod schema;
 pub mod value;
-

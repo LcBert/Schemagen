@@ -2,7 +2,7 @@
 
 use std::{collections::HashMap, ops::RangeInclusive, sync::Arc};
 
-use rand::{Rng, seq::IndexedRandom};
+use rand::seq::IndexedRandom;
 
 use crate::value::{Generator, Value};
 
@@ -13,20 +13,81 @@ enum Step {
 
 /// Generator producing strings by substituting configurable placeholder characters in a template.
 ///
-/// Placeholders are configured using [`Pattern::add_entry`]. Any character without a configured
-/// entry is preserved verbatim. This is useful for generating formatted IDs, codes, or structured strings.
+/// This generator allows you to define a template string with placeholder characters that get
+/// replaced with random characters from specified ranges. Any character without a configured
+/// entry is preserved verbatim. This is extremely useful for generating formatted IDs, codes,
+/// phone numbers, license plates, or any structured string pattern.
 ///
-/// # Example
+/// # Common Use Cases
+///
+/// - **Product IDs**: PRD-1234-ABCD, SKU-5678
+/// - **User IDs**: USR-12345, EMP-0001
+/// - **Phone numbers**: +39 312 345 6789, (555) 123-4567
+/// - **License plates**: AB-123-CD, XYZ-9876
+/// - **Order codes**: ORD-2024-001, INV-5678
+/// - **Serial numbers**: SN-XXXX-YYYY
+///
+/// # Examples
+///
+/// ## Using with Field (recommended)
 ///
 /// ```no_run
 /// use schemagen::{field::Field, schema::Schema};
 ///
 /// let mut schema = Schema::new()
 ///     .add_field("product_id", Field::pattern("PRD-####-????")
-///         .add_entry('#', vec!['0'..='9'])?
-///         .add_entry('?', vec!['A'..='Z'])?);
-/// # Ok::<(), Box<dyn std::error::Error>>(())
+///         .add_entry('#', vec!['0'..='9'])
+///         .add_entry('?', vec!['A'..='Z']))
+///     .add_field("user_code", Field::pattern("USR-#####")
+///         .add_entry('#', vec!['0'..='9']));
+///
+/// // Generate 10 rows
+/// let rows = schema.generate_batch(10);
 /// ```
+///
+/// ## Using the generator directly
+///
+/// ```no_run
+/// use schemagen::r#generators::pattern::Pattern;
+/// use schemagen::value::Generator;
+/// use rand::SeedableRng;
+/// use rand::rngs::StdRng;
+///
+/// let mut rng = StdRng::seed_from_u64(42);
+/// let mut generator = Pattern::new("ID-##-??")
+///     .add_entry('#', vec!['0'..='9'])
+///     .add_entry('?', vec!['A'..='Z']);
+///
+/// for _ in 0..5 {
+///     let value = generator.next_value(&mut rng);
+///     println!("{:?}", value); // e.g., "ID-42-AB", "ID-78-XY"
+/// }
+/// ```
+///
+/// ## Phone number patterns
+///
+/// ```no_run
+/// use schemagen::r#generators::pattern::Pattern;
+///
+/// // Italian mobile: +39 3xx xxx xxxx
+/// let phone_it = Pattern::new("+39 3## ### ####")
+///     .add_entry('#', vec!['0'..='9']);
+///
+/// // USA format: (xxx) xxx-xxxx
+/// let phone_us = Pattern::new("(###) ###-####")
+///     .add_entry('#', vec!['0'..='9']);
+/// ```
+///
+/// # Placeholder Configuration
+///
+/// Placeholders are configured using character ranges:
+/// - `vec!['0'..='9']`: Digits only
+/// - `vec!['A'..='Z']`: Uppercase letters only
+/// - `vec!['a'..='z']`: Lowercase letters only
+/// - `vec!['A'..='Z', 'a'..='z']`: Both cases
+/// - `vec!['0'..='9', 'A'..='F']`: Hexadecimal
+///
+/// Any character in the template without a configured entry is preserved as-is.
 pub struct Pattern {
     template: String,
     rules: HashMap<char, Vec<char>>,
@@ -34,16 +95,21 @@ pub struct Pattern {
 }
 
 impl Pattern {
-    /// Creates a new [`Pattern`] generator with the specified template string and no placeholder rules.
+    /// Creates a new [`Pattern`] generator with the specified template string.
     ///
     /// # Arguments
     ///
     /// * `template` - The template string with placeholder characters to be substituted.
+    ///   Characters without configured rules will be preserved verbatim.
+    ///
+    /// # Returns
+    ///
+    /// A new [`Pattern`] instance. Use [`add_entry`](Self::add_entry) to configure placeholders.
     ///
     /// # Example
     ///
     /// ```no_run
-    /// use schemagen::r#gen::pattern::Pattern;
+    /// use schemagen::r#generators::pattern::Pattern;
     ///
     /// let generator = Pattern::new("USER-####");
     /// ```
@@ -62,39 +128,24 @@ impl Pattern {
     /// * `placeholder` - The character in the template to be replaced.
     /// * `ranges` - A vector of character ranges to randomly select from for this placeholder.
     ///
-    /// # Errors
+    /// # Returns
     ///
-    /// Returns `Err(String)` if `ranges` is empty or contains an invalid `RangeInclusive<char>`.
+    /// Returns `self` to allow method chaining.
     ///
     /// # Example
     ///
     /// ```no_run
-    /// use schemagen::r#gen::pattern::Pattern;
+    /// use schemagen::r#generators::pattern::Pattern;
     ///
     /// let generator = Pattern::new("ID-##-??")
-    ///     .add_entry('#', vec!['0'..='9'])?           // # becomes a digit
-    ///     .add_entry('?', vec!['A'..='Z', 'a'..='z'])?; // ? becomes a letter
-    /// # Ok::<(), String>(())
+    ///     .add_entry('#', vec!['0'..='9'])             // # becomes a digit
+    ///     .add_entry('?', vec!['A'..='Z', 'a'..='z']); // ? becomes a letter
     /// ```
-    pub fn add_entry(
-        mut self,
-        placeholder: char,
-        ranges: Vec<RangeInclusive<char>>,
-    ) -> Result<Self, String> {
-        if ranges.is_empty() {
-            return Err(format!(
-                "Ranges for placeholder '{placeholder}' cannot be empty"
-            ));
-        }
-
+    pub fn add_entry(mut self, placeholder: char, ranges: Vec<RangeInclusive<char>>) -> Self {
         let mut char_pool = Vec::new();
         for r in ranges {
             if r.is_empty() {
-                return Err(format!(
-                    "Range not valid for '{placeholder}': '{}'..='{}'",
-                    r.start(),
-                    r.end()
-                ));
+                continue;
             }
             for ch in r {
                 char_pool.push(ch);
@@ -103,7 +154,7 @@ impl Pattern {
 
         self.rules.insert(placeholder, char_pool);
         self.compiled = None;
-        Ok(self)
+        self
     }
 
     fn compile(&mut self) {
@@ -127,7 +178,7 @@ impl Pattern {
 }
 
 impl Generator for Pattern {
-    fn next_value(&mut self, rng: &mut dyn Rng) -> Value {
+    fn next_value(&mut self, rng: &mut dyn rand::prelude::Rng) -> Value {
         if self.compiled.is_none() {
             self.compile();
         }
@@ -162,9 +213,7 @@ mod tests {
         let template = "USR-####-??";
         let mut generator = Pattern::new(template)
             .add_entry('#', vec!['0'..='9'])
-            .unwrap()
-            .add_entry('?', vec!['A'..='Z'])
-            .unwrap();
+            .add_entry('?', vec!['A'..='Z']);
 
         for _ in 0..1000 {
             match generator.next_value(&mut rng) {
@@ -205,17 +254,4 @@ mod tests {
             );
         }
     }
-
-    #[test]
-    fn test_empty_ranges_returns_err() {
-        let result = Pattern::new("TEST-#").add_entry('#', vec![]);
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_invalid_char_range_returns_err() {
-        let result = Pattern::new("TEST-#").add_entry('#', vec!['z'..='a']);
-        assert!(result.is_err());
-    }
 }
-

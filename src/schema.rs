@@ -67,7 +67,7 @@ impl<'a> Iterator for SchemaIter<'a> {
 /// let mut schema = Schema::new()
 ///     .with_seed(12345)
 ///     .add_field("id", Field::sequential(1, 1))
-///     .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']).unwrap())
+///     .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']))
 ///     .add_field("price", Field::range_float(1.0, 100.0, Some(2)));
 ///
 /// // Generate JSON
@@ -136,7 +136,7 @@ impl Schema {
     ///
     /// let schema = Schema::new()
     ///     .add_field("id", Field::sequential(1, 1))
-    ///     .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']).unwrap());
+    ///     .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']));
     /// ```
     pub fn add_field<G: Generator + 'static>(
         mut self,
@@ -313,7 +313,7 @@ impl Schema {
     ///
     /// let mut schema = Schema::new()
     ///     .add_field("id", Field::sequential(1, 1))
-    ///     .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']).unwrap());
+    ///     .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']));
     ///
     /// schema.write_csv("output", 100, true)?;
     /// # Ok::<(), Box<dyn std::error::Error>>(())
@@ -374,7 +374,7 @@ impl Schema {
     ///
     /// let mut schema = Schema::new()
     ///     .add_field("id", Field::sequential(1, 1))
-    ///     .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']).unwrap());
+    ///     .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']));
     ///
     /// schema.write_sql("users", "output", 100)?;
     /// # Ok::<(), Box<dyn std::error::Error>>(())

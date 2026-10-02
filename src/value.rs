@@ -1,7 +1,6 @@
 //! Core data types and generator abstraction.
 
 use indexmap::IndexMap;
-use rand::Rng;
 use serde::Serialize;
 use uuid::Uuid;
 
@@ -13,8 +12,6 @@ use uuid::Uuid;
 #[serde(untagged)]
 pub enum Value {
     /// Null / empty value.
-    ///
-    /// Serialized as `null` in JSON, empty string in CSV, and `NULL` in SQL.
     None,
     /// 64-bit signed integer.
     Int(i64),
@@ -27,14 +24,8 @@ pub enum Value {
     /// Uuid value.
     Uuid(Uuid),
     /// Array value containing multiple sub-values.
-    ///
-    /// Useful for representing arrays or composite structures where multiple values
-    /// are generated together. Serialized as a PostgreSQL ARRAY in SQL format.
     Array(Vec<Value>),
     /// Object value with named fields.
-    ///
-    /// Represents a JSON-like object with string keys and [`Value`] values.
-    /// Field order is preserved using `IndexMap`. Serialized as JSON in SQL format.
     Object(IndexMap<String, Value>),
 }
 
@@ -118,11 +109,11 @@ pub trait Generator {
     ///
     /// # Arguments
     ///
-    /// * `rng` - A random number generator. For deterministic generators (like [`Sequential`](crate::gen::sequential::Sequential)),
+    /// * `rng` - A random number generator. For deterministic generators (like [`Sequential`](crate::generators::sequential::Sequential)),
     ///   this parameter may be ignored.
     ///
     /// # Returns
     ///
     /// The next [`Value`] in the generation sequence.
-    fn next_value(&mut self, rng: &mut dyn Rng) -> Value;
+    fn next_value(&mut self, rng: &mut dyn rand::Rng) -> Value;
 }

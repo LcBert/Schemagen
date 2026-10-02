@@ -15,13 +15,24 @@ enum Mode {
     Time { min_secs: u32, max_secs: u32 },
 }
 
-/// Generator producing random date, time, or datetime strings.
+/// Generator producing random date, time, or datetime strings within a specified range.
 ///
-/// Automatically detects whether the input corresponds to a full datetime,
-/// a date only, or a time only based on the provided format. This is useful
-/// for generating timestamps, birth dates, appointment times, or any temporal data.
+/// This generator automatically detects whether the input corresponds to a full datetime,
+/// a date only, or a time only based on the provided format string. It uses the chrono
+/// library for parsing and formatting, supporting a wide variety of date/time formats.
+/// This is ideal for generating timestamps, birth dates, appointment times, or any temporal data.
 ///
-/// # Example
+/// # Common Use Cases
+///
+/// - **Timestamps**: Created/updated timestamps for records
+/// - **Birth dates**: Random dates within a realistic range
+/// - **Appointment times**: Business hours or specific time slots
+/// - **Event dates**: Historical or future events
+/// - **Schedule data**: Recurring events or time-based data
+///
+/// # Examples
+///
+/// ## Using with Field (recommended)
 ///
 /// ```no_run
 /// use schemagen::{field::Field, schema::Schema};
@@ -34,7 +45,49 @@ enum Mode {
 ///     ))
 ///     .add_field("birth_date", Field::date("1990-01-01", "2000-12-31"))
 ///     .add_field("appointment_time", Field::time("09:00:00", "17:00:00"));
+///
+/// // Generate 10 rows
+/// let rows = schema.generate_batch(10);
 /// ```
+///
+/// ## Using the generator directly
+///
+/// ```no_run
+/// use schemagen::r#generators::datetime::Datetime;
+/// use schemagen::value::Generator;
+/// use rand::SeedableRng;
+/// use rand::rngs::StdRng;
+///
+/// let mut rng = StdRng::seed_from_u64(42);
+///
+/// // Full datetime
+/// let mut generator = Datetime::new(
+///     "2024-01-01 00:00:00",
+///     "2024-12-31 23:59:59",
+///     "%Y-%m-%d %H:%M:%S"
+/// );
+///
+/// for _ in 0..5 {
+///     let value = generator.next_value(&mut rng);
+///     println!("{:?}", value); // e.g., "2024-06-15 14:32:45"
+/// }
+/// ```
+///
+/// # Date/Time Formats
+///
+/// The generator automatically detects the type based on successful parsing:
+/// - **Full datetime**: `"2024-01-01 00:00:00"` with format `"%Y-%m-%d %H:%M:%S"`
+/// - **Date only**: `"2024-01-01"` with format `"%Y-%m-%d"`
+/// - **Time only**: `"08:00:00"` with format `"%H:%M:%S"`
+///
+/// See [chrono format documentation](https://docs.rs/chrono/latest/chrono/format/strftime/index.html)
+/// for all supported format specifiers.
+///
+/// # Panics
+///
+/// Panics if:
+/// - `start` or `end` cannot be parsed with `date_format`
+/// - `start > end`
 pub struct Datetime {
     mode: Mode,
     date_format: String,
@@ -49,10 +102,9 @@ impl Datetime {
     /// * `end` - The end boundary as a string (inclusive).
     /// * `date_format` - The chrono format string to use for parsing and output.
     ///
-    /// The generator automatically detects the type based on successful parsing:
-    /// - Full date and time (e.g. `"2024-01-01 00:00:00"`, format `"%Y-%m-%d %H:%M:%S"`)
-    /// - Date only (e.g. `"2024-01-01"`, format `"%Y-%m-%d"`)
-    /// - Time only (e.g. `"08:00:00"`, format `"%H:%M:%S"`)
+    /// # Returns
+    ///
+    /// A new [`Datetime`] instance that generates values in the range `[start, end]`.
     ///
     /// # Panics
     ///
@@ -61,7 +113,7 @@ impl Datetime {
     /// # Example
     ///
     /// ```no_run
-    /// use schemagen::r#gen::datetime::Datetime;
+    /// use schemagen::r#generators::datetime::Datetime;
     ///
     /// // Full datetime
     /// let generator = Datetime::new(

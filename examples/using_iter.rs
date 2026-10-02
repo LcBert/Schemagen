@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("{sum:.2}");
 
-    let pattern_field = Field::pattern("###").add_entry('#', vec!['0'..='9'])?;
+    let pattern_field = Field::pattern("###").add_entry('#', vec!['0'..='9']);
     let mut schema = Schema::new().add_field("id", pattern_field);
 
     let iterator = schema
