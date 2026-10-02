@@ -36,7 +36,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test() {
+    fn test_range_int() {
         let mut rng = StdRng::seed_from_u64(45);
         let min = 5;
         let max = 15;
@@ -52,4 +52,39 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_negative_range() {
+        let mut rng = StdRng::seed_from_u64(45);
+        let min = -50;
+        let max = -10;
+        let mut generator = RangeInt::new(min, max);
+
+        for _ in 1000..=2000 {
+            match generator.next_value(&mut rng) {
+                Value::Int(v) => assert!(
+                    (min..=max).contains(&v),
+                    "Value {v} out of range [{min}, {max}]"
+                ),
+                _ => panic!("Unexpected type"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_single_value() {
+        let mut rng = StdRng::seed_from_u64(45);
+        let mut generator = RangeInt::new(42, 42);
+
+        for _ in 0..100 {
+            assert_eq!(generator.next_value(&mut rng), Value::Int(42));
+        }
+    }
+
+    #[test]
+    #[should_panic(expected = "min must be <= max")]
+    fn test_invalid_range_panics() {
+        RangeInt::new(10, 5);
+    }
 }
+

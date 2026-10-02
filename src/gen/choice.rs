@@ -35,7 +35,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test() {
+    fn test_choice() {
         let mut rng = StdRng::seed_from_u64(45);
         let options: Vec<String> = vec![
             "test1".to_string(),
@@ -51,4 +51,24 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_single_option() {
+        let mut rng = StdRng::seed_from_u64(45);
+        let mut generator = Choice::new(vec!["only_one".to_string()]);
+
+        for _ in 0..100 {
+            assert_eq!(
+                generator.next_value(&mut rng),
+                Value::Text("only_one".to_string())
+            );
+        }
+    }
+
+    #[test]
+    #[should_panic(expected = "Options cannot be empty")]
+    fn test_empty_options_panics() {
+        Choice::new(Vec::new());
+    }
 }
+

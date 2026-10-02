@@ -181,12 +181,16 @@ impl Schema {
         Ok(())
     }
 
+    /// Streams `count` records directly into an SQL file at `path` as `INSERT INTO` statements.
+    ///
+    /// Automatically appends the `.sql` extension if not present.
     pub fn write_sql<P: AsRef<Path>>(
         &mut self,
         table_name: &str,
         path: P,
         count: usize,
     ) -> io::Result<()> {
+
         let final_path = ensure_extension(path, "sql");
         let file = File::create(final_path)?;
         let mut writer = BufWriter::new(file);

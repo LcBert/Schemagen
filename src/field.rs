@@ -98,20 +98,20 @@ impl Field {
     ///
     /// Panics if `start` or `end` cannot be parsed with `date_format`, or if `start > end`.
     pub fn datetime(
-        start: impl AsRef<str>,
-        end: impl AsRef<str>,
-        date_format: &'static str,
+        start: impl Into<String>,
+        end: impl Into<String>,
+        date_format: impl Into<String>,
     ) -> Datetime {
         Datetime::new(start, end, date_format)
     }
 
     /// Creates a random date generator using the default format `"%Y-%m-%d"`.
-    pub fn date(start: impl AsRef<str>, end: impl AsRef<str>) -> Datetime {
+    pub fn date(start: impl Into<String>, end: impl Into<String>) -> Datetime {
         Datetime::new(start, end, "%Y-%m-%d")
     }
 
     /// Creates a random time generator using the default format `"%H:%M:%S"`.
-    pub fn time(start: impl AsRef<str>, end: impl AsRef<str>) -> Datetime {
+    pub fn time(start: impl Into<String>, end: impl Into<String>) -> Datetime {
         Datetime::new(start, end, "%H:%M:%S")
     }
 }

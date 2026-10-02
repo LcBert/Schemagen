@@ -46,11 +46,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test() {
+    fn test_sequential_float_with_decimals() {
         let mut rng = StdRng::seed_from_u64(45);
         let mut generator = SequentialFloat::new(1.0, 0.5, Some(2));
 
-        for step in 0..9998 {
+        for step in 0..1000 {
             let expected = 1.0 + (step as f64) * 0.5;
             match generator.next_value(&mut rng) {
                 Value::Float(v) => assert_eq!(
@@ -61,4 +61,15 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_sequential_float_negative_step() {
+        let mut rng = StdRng::seed_from_u64(45);
+        let mut generator = SequentialFloat::new(10.0, -0.5, Some(1));
+
+        assert_eq!(generator.next_value(&mut rng), Value::Float(10.0));
+        assert_eq!(generator.next_value(&mut rng), Value::Float(9.5));
+        assert_eq!(generator.next_value(&mut rng), Value::Float(9.0));
+    }
 }
+

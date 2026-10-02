@@ -46,7 +46,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test() {
+    fn test_range_float() {
         let mut rng = StdRng::seed_from_u64(45);
         let min = 5.0;
         let max = 15.0;
@@ -63,4 +63,26 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_without_decimals() {
+        let mut rng = StdRng::seed_from_u64(45);
+        let min = 1.0;
+        let max = 10.0;
+        let mut generator = RangeFloat::new(min, max, None);
+
+        for _ in 0..1000 {
+            match generator.next_value(&mut rng) {
+                Value::Float(v) => assert!((min..=max).contains(&v)),
+                _ => panic!("Unexpected type"),
+            }
+        }
+    }
+
+    #[test]
+    #[should_panic(expected = "min must be <= max")]
+    fn test_invalid_range_panics() {
+        RangeFloat::new(10.0, 1.0, None);
+    }
 }
+

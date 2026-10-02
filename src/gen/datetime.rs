@@ -21,7 +21,7 @@ enum Mode {
 /// a date only, or a time only based on the provided format.
 pub struct Datetime {
     mode: Mode,
-    date_format: &'static str,
+    date_format: String,
 }
 
 impl Datetime {
@@ -35,14 +35,19 @@ impl Datetime {
     /// # Panics
     ///
     /// Panics if `start` or `end` cannot be parsed with `date_format`, or if `start > end`.
-    pub fn new(start: impl AsRef<str>, end: impl AsRef<str>, date_format: &'static str) -> Self {
-        let start_str = start.as_ref();
-        let end_str = end.as_ref();
+    pub fn new(
+        start: impl Into<String>,
+        end: impl Into<String>,
+        date_format: impl Into<String>,
+    ) -> Self {
+        let start_str = start.into();
+        let end_str = end.into();
+        let date_format = date_format.into();
 
         // 1. Try parsing as full NaiveDateTime
         if let (Ok(s), Ok(e)) = (
-            NaiveDateTime::parse_from_str(start_str, date_format),
-            NaiveDateTime::parse_from_str(end_str, date_format),
+            NaiveDateTime::parse_from_str(&start_str, &date_format),
+            NaiveDateTime::parse_from_str(&end_str, &date_format),
         ) {
             let min_ts = s.and_utc().timestamp();
             let max_ts = e.and_utc().timestamp();
@@ -55,8 +60,8 @@ impl Datetime {
 
         // 2. Try parsing as NaiveDate
         if let (Ok(s), Ok(e)) = (
-            NaiveDate::parse_from_str(start_str, date_format),
-            NaiveDate::parse_from_str(end_str, date_format),
+            NaiveDate::parse_from_str(&start_str, &date_format),
+            NaiveDate::parse_from_str(&end_str, &date_format),
         ) {
             let min_ts = s
                 .and_hms_opt(0, 0, 0)
@@ -77,8 +82,8 @@ impl Datetime {
 
         // 3. Try parsing as NaiveTime
         if let (Ok(s), Ok(e)) = (
-            NaiveTime::parse_from_str(start_str, date_format),
-            NaiveTime::parse_from_str(end_str, date_format),
+            NaiveTime::parse_from_str(&start_str, &date_format),
+            NaiveTime::parse_from_str(&end_str, &date_format),
         ) {
             let min_secs = s.num_seconds_from_midnight();
             let max_secs = e.num_seconds_from_midnight();
@@ -101,7 +106,7 @@ impl Generator for Datetime {
             Mode::DateTime { min_ts, max_ts } => {
                 let ts = rng.random_range(min_ts..=max_ts);
                 if let Some(dt) = DateTime::from_timestamp(ts, 0) {
-                    Value::Text(dt.format(self.date_format).to_string())
+                    Value::Text(dt.format(&self.date_format).to_string())
                 } else {
                     Value::None
                 }
@@ -109,7 +114,7 @@ impl Generator for Datetime {
             Mode::Date { min_ts, max_ts } => {
                 let ts = rng.random_range(min_ts..=max_ts);
                 if let Some(dt) = DateTime::from_timestamp(ts, 0) {
-                    Value::Text(dt.date_naive().format(self.date_format).to_string())
+                    Value::Text(dt.date_naive().format(&self.date_format).to_string())
                 } else {
                     Value::None
                 }
@@ -117,7 +122,7 @@ impl Generator for Datetime {
             Mode::Time { min_secs, max_secs } => {
                 let secs = rng.random_range(min_secs..=max_secs);
                 if let Some(time) = NaiveTime::from_num_seconds_from_midnight_opt(secs, 0) {
-                    Value::Text(time.format(self.date_format).to_string())
+                    Value::Text(time.format(&self.date_format).to_string())
                 } else {
                     Value::None
                 }

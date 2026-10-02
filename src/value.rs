@@ -8,6 +8,7 @@ use uuid::Uuid;
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum Value {
+    /// Null / empty value.
     None,
     /// 64-bit signed integer.
     Int(i64),
@@ -22,6 +23,7 @@ pub enum Value {
 }
 
 impl Value {
+    /// Formats the value as a valid SQL literal for `INSERT INTO` queries.
     pub fn to_sql(&self) -> String {
         match self {
             Value::None => "NULL".to_string(),
@@ -38,7 +40,6 @@ impl Value {
             Value::Uuid(v) => format!("'{v}'"),
         }
     }
-
 }
 
 impl std::fmt::Display for Value {

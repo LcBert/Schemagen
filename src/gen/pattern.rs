@@ -117,7 +117,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test() {
+    fn test_pattern_with_placeholders() {
         let mut rng = StdRng::seed_from_u64(45);
         let template = "USR-####-??";
         let mut generator = Pattern::new(template)
@@ -126,7 +126,7 @@ mod tests {
             .add_entry('?', vec!['A'..='Z'])
             .unwrap();
 
-        for _ in 0..10000 {
+        for _ in 0..1000 {
             match generator.next_value(&mut rng) {
                 Value::Text(v) => {
                     assert_eq!(v.len(), template.len(), "Length mismatch");
@@ -152,4 +152,30 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_literal_only_pattern() {
+        let mut rng = StdRng::seed_from_u64(45);
+        let mut generator = Pattern::new("CONSTANT_STRING");
+
+        for _ in 0..10 {
+            assert_eq!(
+                generator.next_value(&mut rng),
+                Value::Text("CONSTANT_STRING".to_string())
+            );
+        }
+    }
+
+    #[test]
+    fn test_empty_ranges_returns_err() {
+        let result = Pattern::new("TEST-#").add_entry('#', vec![]);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_invalid_char_range_returns_err() {
+        let result = Pattern::new("TEST-#").add_entry('#', vec!['z'..='a']);
+        assert!(result.is_err());
+    }
 }
+

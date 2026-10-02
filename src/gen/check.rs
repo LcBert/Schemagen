@@ -29,15 +29,24 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test() {
+    fn test_check_distribution() {
         let mut rng = StdRng::seed_from_u64(45);
         let mut generator = Check::new();
 
+        let mut true_count = 0;
+        let mut false_count = 0;
+
         for _ in 0..10000 {
             match generator.next_value(&mut rng) {
-                Value::Boolean(v) => assert!(v || !v, "Value is not true or false"),
+                Value::Boolean(true) => true_count += 1,
+                Value::Boolean(false) => false_count += 1,
                 _ => panic!("Unexpected type"),
             }
         }
+
+        // With 10,000 iterations and 50/50 probability, both should be well-represented
+        assert!(true_count > 4000, "Too few true values: {true_count}");
+        assert!(false_count > 4000, "Too few false values: {false_count}");
     }
 }
+
