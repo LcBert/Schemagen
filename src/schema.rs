@@ -330,7 +330,7 @@ impl Schema {
 
         let headers: Vec<String> = self.fields.iter().map(|(name, _)| name.clone()).collect();
         if export_headers {
-            writer.write_all(headers.join(",").as_bytes())?;
+            writer.write_all(headers.join(";").as_bytes())?;
             writer.write_all(b"\n")?;
         }
 
@@ -338,7 +338,7 @@ impl Schema {
             let mut first = true;
             for header in &headers {
                 if !first {
-                    writer.write_all(b",")?;
+                    writer.write_all(b";")?;
                 }
                 first = false;
 

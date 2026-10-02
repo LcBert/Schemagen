@@ -4,7 +4,9 @@ use crate::{
     r#gen::{
         check::Check,
         choice::Choice,
+        array::Array,
         datetime::Datetime,
+        object_gen::ObjectGen,
         optional_null::OptionalNull,
         pattern::Pattern,
         range_float::RangeFloat,
@@ -35,30 +37,6 @@ use crate::{
 pub struct Field;
 
 impl Field {
-    /// Creates a generator that wraps another generator and produces `NULL` values with a configurable probability.
-    ///
-    /// # Arguments
-    ///
-    /// * `generator` - The inner generator to wrap.
-    /// * `chance` - Probability (0.0 to 1.0) of returning the generated value instead of `NULL`.
-    ///   For example, `0.9` means 90% chance of generating a value, 10% chance of `NULL`.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `chance` is not in the range `[0.0, 1.0]`.
-    ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// use schemagen::{field::Field, schema::Schema};
-    ///
-    /// let mut schema = Schema::new()
-    ///     .add_field("optional_id", Field::optional_null(Field::range_int(1, 100), 0.8));
-    /// ```
-    pub fn optional_null<G: Generator + 'static>(generator: G, chance: f32) -> OptionalNull<G> {
-        OptionalNull::new(generator, chance)
-    }
-
     /// Creates a generator that produces uniform random integers within `[min, max]`.
     ///
     /// # Arguments
@@ -214,5 +192,37 @@ impl Field {
     /// Panics if `start` or `end` cannot be parsed, or if `start > end`.
     pub fn time(start: impl Into<String>, end: impl Into<String>) -> Datetime {
         Datetime::new(start, end, "%H:%M:%S")
+    }
+
+    /// Creates a generator that wraps another generator and produces `NULL` values with a configurable probability.
+    ///
+    /// # Arguments
+    ///
+    /// * `generator` - The inner generator to wrap.
+    /// * `chance` - Probability (0.0 to 1.0) of returning the generated value instead of `NULL`.
+    ///   For example, `0.9` means 90% chance of generating a value, 10% chance of `NULL`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `chance` is not in the range `[0.0, 1.0]`.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use schemagen::{field::Field, schema::Schema};
+    ///
+    /// let mut schema = Schema::new()
+    ///     .add_field("optional_id", Field::optional_null(Field::range_int(1, 100), 0.8));
+    /// ```
+    pub fn optional_null<G: Generator + 'static>(generator: G, chance: f32) -> OptionalNull<G> {
+        OptionalNull::new(generator, chance)
+    }
+
+    pub fn array() -> Array {
+        Array::new()
+    }
+
+    pub fn object() -> ObjectGen {
+        ObjectGen::new()
     }
 }

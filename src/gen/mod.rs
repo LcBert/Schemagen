@@ -2,7 +2,9 @@
 
 pub mod check;
 pub mod choice;
+pub mod array;
 pub mod datetime;
+pub mod object_gen;
 pub mod optional_null;
 pub mod pattern;
 pub mod range_float;

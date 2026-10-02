@@ -34,6 +34,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let optional_int = Field::optional_null(Field::range_int(1, 100), 0.5);
 
+    let array = Field::array()
+        .add_generator(Field::range_int(1, 10))
+        .add_generator(Field::range_float(1.0, 10.0, Some(2)))
+        .add_generator(Field::pattern("ABC-##").add_entry('#', vec!['0'..='9'])?);
+
+    let object = Field::object()
+        .add_field("field1", Field::range_int(1, 10))
+        .add_field("field2", Field::range_float(1.0, 10.0, Some(2)))
+        .add_field(
+            "field3",
+            Field::pattern("ABC-##").add_entry('#', vec!['0'..='9'])?,
+        );
+
     // Fill Schema with desired Fields
     let mut schema = Schema::new()
         .with_seed(12345)
@@ -49,7 +62,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_field("datetime", datetime)
         .add_field("date", date)
         .add_field("time", time)
-        .add_field("optional_int", optional_int);
+        .add_field("optional_int", optional_int)
+        .add_field("array", array)
+        .add_field("object", object);
 
     // Generate json
     let generated = schema.generate_json(10)?;

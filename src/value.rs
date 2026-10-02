@@ -1,5 +1,6 @@
 //! Core data types and generator abstraction.
 
+use indexmap::IndexMap;
 use rand::Rng;
 use serde::Serialize;
 use uuid::Uuid;
@@ -25,6 +26,16 @@ pub enum Value {
     Boolean(bool),
     /// Uuid value.
     Uuid(Uuid),
+    /// Array value containing multiple sub-values.
+    ///
+    /// Useful for representing arrays or composite structures where multiple values
+    /// are generated together. Serialized as a PostgreSQL ARRAY in SQL format.
+    Array(Vec<Value>),
+    /// Object value with named fields.
+    ///
+    /// Represents a JSON-like object with string keys and [`Value`] values.
+    /// Field order is preserved using `IndexMap`. Serialized as JSON in SQL format.
+    Object(IndexMap<String, Value>),
 }
 
 impl Value {
@@ -43,6 +54,15 @@ impl Value {
                 }
             }
             Value::Uuid(v) => format!("'{v}'"),
+            Value::Array(v) => {
+                let items: Vec<String> = v.iter().map(|val| val.to_sql()).collect();
+                format!("ARRAY[{}]", items.join(", "))
+            }
+            Value::Object(map) => {
+                // Serializza in formato JSON valido per colonne di tipo JSONB/JSON in SQL
+                let json_str = serde_json::to_string(map).unwrap_or_else(|_| "{}".to_string());
+                format!("'{}'", json_str.replace('\'', "''"))
+            }
         }
     }
 }
@@ -54,8 +74,18 @@ impl std::fmt::Display for Value {
             Value::Int(v) => write!(f, "{v}"),
             Value::Float(v) => write!(f, "{v}"),
             Value::Text(v) => write!(f, "{v}"),
-            Value::Boolean(v) => write!(f, "{v}"),
+            Value::Boolean(v) => write!(f, "{v}",),
             Value::Uuid(v) => write!(f, "{v}"),
+            Value::Array(v) => {
+                for val in v.iter() {
+                    write!(f, "{val}")?;
+                }
+                write!(f, "")
+            }
+            Value::Object(map) => {
+                let json = serde_json::to_string(map).unwrap_or_default();
+                write!(f, "{json}")
+            }
         }
     }
 }
