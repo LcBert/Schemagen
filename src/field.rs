@@ -226,7 +226,5 @@ impl Field {
         ObjectGen::new()
     }
 
-    pub fn email() -> Pattern {
-        Field::pattern("user???@example.com").add_entry('?', vec!['0'..='9'])
-    }
+
 }

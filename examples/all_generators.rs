@@ -47,8 +47,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             Field::pattern("ABC-##").add_entry('#', vec!['0'..='9']),
         );
 
-    let email = Field::email();
-
     // Fill Schema with desired Fields
     let mut schema = Schema::new()
         // .with_seed(12345)
@@ -66,8 +64,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_field("time", time)
         .add_field("optional_int", optional_int)
         .add_field("array", array)
-        .add_field("object", object)
-        .add_field("email", email);
+        .add_field("object", object);
 
     // Generate json
     let generated = schema.generate_json(10)?;

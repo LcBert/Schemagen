@@ -36,7 +36,7 @@
 //!   - `sequential` / `sequential_float`: Deterministic counters with custom step increments
 //!   - `uuid`: UUID v4 (random) or v7 (time-ordered) generation
 //!   - `datetime` / `date` / `time`: Random date/time generation with custom formats
-//!   - `optional_null`: Wrap any generator to produce NULL values with configurable probability
+//!   - `optional_value`: Wrap any generator to produce NULL values with configurable probability
 //!   - `array`: Combine multiple generators to produce PostgreSQL ARRAY values
 //!   - `object`: Generate JSON-like objects with named fields (compatible with JSONB/JSON columns)
 //! - **Streaming & Exporting**:
