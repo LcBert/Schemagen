@@ -7,7 +7,7 @@ use crate::{
         choice::Choice,
         datetime::Datetime,
         object_gen::ObjectGen,
-        optional_null::OptionalNull,
+        optional_value::OptionalValue,
         pattern::Pattern,
         range_float::RangeFloat,
         range_int::RangeInt,
@@ -212,10 +212,10 @@ impl Field {
     /// use schemagen::{field::Field, schema::Schema};
     ///
     /// let mut schema = Schema::new()
-    ///     .add_field("optional_id", Field::optional_null(Field::range_int(1, 100), 0.8));
+    ///     .add_field("optional_id", Field::optional_value(Field::range_int(1, 100), 0.8));
     /// ```
-    pub fn optional_null<G: Generator + 'static>(generator: G, chance: f32) -> OptionalNull<G> {
-        OptionalNull::new(generator, chance)
+    pub fn optional_value<G: Generator + 'static>(generator: G, chance: f32) -> OptionalValue<G> {
+        OptionalValue::new(generator, chance)
     }
 
     pub fn array() -> Array {

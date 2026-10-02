@@ -32,7 +32,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let time = Field::time("00:00:00", "23:59:59");
 
-    let optional_int = Field::optional_null(Field::range_int(1, 100), 0.5);
+    let optional_int = Field::optional_value(Field::range_int(1, 100), 0.5);
 
     let array = Field::array()
         .add_generator(Field::range_int(1, 10))

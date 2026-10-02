@@ -27,11 +27,11 @@ use crate::value::{Generator, Value};
 ///
 /// let mut schema = Schema::new()
 ///     .add_field("id", Field::range_int(1, 100))
-///     .add_field("phone", Field::optional_null(
+///     .add_field("phone", Field::optional_value(
 ///         Field::pattern("+39 3## ### ####").add_entry('#', vec!['0'..='9']),
 ///         0.7  // 70% chance of a phone number, 30% NULL
 ///     ))
-///     .add_field("discount_code", Field::optional_null(
+///     .add_field("discount_code", Field::optional_value(
 ///         Field::choice(vec!["SAVE10", "SAVE20", "SAVE30"]),
 ///         0.2  // 20% chance of discount, 80% NULL
 ///     ));
@@ -43,7 +43,7 @@ use crate::value::{Generator, Value};
 /// ## Using the generator directly
 ///
 /// ```no_run
-/// use schemagen::r#generators::optional_null::OptionalNull;
+/// use schemagen::r#generators::optional_value::OptionalValue;
 /// use schemagen::r#generators::range_int::RangeInt;
 /// use schemagen::value::Generator;
 /// use rand::SeedableRng;
@@ -51,7 +51,7 @@ use crate::value::{Generator, Value};
 ///
 /// let mut rng = StdRng::seed_from_u64(42);
 /// let inner = RangeInt::new(1, 100);
-/// let mut generator = OptionalNull::new(inner, 0.8); // 80% value, 20% NULL
+/// let mut generator = OptionalValue::new(inner, 0.8); // 80% value, 20% NULL
 ///
 /// for _ in 0..10 {
 ///     let value = generator.next_value(&mut rng);
@@ -75,13 +75,13 @@ use crate::value::{Generator, Value};
 /// # Panics
 ///
 /// Panics if `chance` is not in the range `[0.0, 1.0]`.
-pub struct OptionalNull<G: Generator + 'static> {
+pub struct OptionalValue<G: Generator + 'static> {
     generator: G,
     chance: f32,
 }
 
-impl<G: 'static + Generator> OptionalNull<G> {
-    /// Creates a new [`OptionalNull`] wrapper.
+impl<G: 'static + Generator> OptionalValue<G> {
+    /// Creates a new [`OptionalValue`] wrapper.
     ///
     /// # Type Parameters
     ///
@@ -95,7 +95,7 @@ impl<G: 'static + Generator> OptionalNull<G> {
     ///
     /// # Returns
     ///
-    /// A new [`OptionalNull`] instance wrapping the provided generator.
+    /// A new [`OptionalValue`] instance wrapping the provided generator.
     ///
     /// # Panics
     ///
@@ -104,17 +104,17 @@ impl<G: 'static + Generator> OptionalNull<G> {
     /// # Example
     ///
     /// ```no_run
-    /// use schemagen::r#generators::optional_null::OptionalNull;
+    /// use schemagen::r#generators::optional_value::OptionalValue;
     /// use schemagen::r#generators::range_int::RangeInt;
     ///
     /// // 80% chance of value, 20% chance of NULL
-    /// let generator = OptionalNull::new(RangeInt::new(1, 100), 0.8);
+    /// let generator = OptionalValue::new(RangeInt::new(1, 100), 0.8);
     ///
     /// // Always generates a value (never NULL)
-    /// let generator = OptionalNull::new(RangeInt::new(1, 100), 1.0);
+    /// let generator = OptionalValue::new(RangeInt::new(1, 100), 1.0);
     ///
     /// // Always NULL (never generates a value)
-    /// let generator = OptionalNull::new(RangeInt::new(1, 100), 0.0);
+    /// let generator = OptionalValue::new(RangeInt::new(1, 100), 0.0);
     /// ```
     pub fn new(generator: G, chance: f32) -> Self {
         assert!(
@@ -125,7 +125,7 @@ impl<G: 'static + Generator> OptionalNull<G> {
     }
 }
 
-impl<G: 'static + Generator> Generator for OptionalNull<G> {
+impl<G: 'static + Generator> Generator for OptionalValue<G> {
     fn next_value(&mut self, rng: &mut dyn rand::prelude::Rng) -> Value {
         if rng.random_range(0.0..=1.0) <= self.chance {
             self.generator.next_value(rng)
@@ -143,10 +143,10 @@ mod tests {
     use crate::r#generators::range_int::RangeInt;
 
     #[test]
-    fn test_optional_null_always_value() {
+    fn test_optional_value_always_value() {
         let mut rng = StdRng::seed_from_u64(42);
         let inner = RangeInt::new(1, 100);
-        let mut generator = OptionalNull::new(inner, 1.0);
+        let mut generator = OptionalValue::new(inner, 1.0);
 
         for _ in 0..100 {
             match generator.next_value(&mut rng) {
@@ -158,10 +158,10 @@ mod tests {
     }
 
     #[test]
-    fn test_optional_null_always_none() {
+    fn test_optional_value_always_none() {
         let mut rng = StdRng::seed_from_u64(42);
         let inner = RangeInt::new(1, 100);
-        let mut generator = OptionalNull::new(inner, 0.0);
+        let mut generator = OptionalValue::new(inner, 0.0);
 
         for _ in 0..100 {
             match generator.next_value(&mut rng) {
@@ -172,10 +172,10 @@ mod tests {
     }
 
     #[test]
-    fn test_optional_null_mixed() {
+    fn test_optional_value_mixed() {
         let mut rng = StdRng::seed_from_u64(42);
         let inner = RangeInt::new(1, 100);
-        let mut generator = OptionalNull::new(inner, 0.5);
+        let mut generator = OptionalValue::new(inner, 0.5);
 
         let mut value_count = 0;
         let mut none_count = 0;
@@ -197,6 +197,6 @@ mod tests {
     #[should_panic(expected = "chance not valid")]
     fn test_invalid_chance_panics() {
         let inner = RangeInt::new(1, 100);
-        OptionalNull::new(inner, 1.5);
+        OptionalValue::new(inner, 1.5);
     }
 }

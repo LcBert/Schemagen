@@ -1,13 +1,7 @@
 set quiet
 
-generate-json:
-    cargo run --example generate_json
-
 example:
-    cargo run --example generate_json
-    cargo run --example write_jsonl
-    cargo run --example write_csv
-    cargo run --example write_sql
+    cargo run --example all_generators
 
 package:
     cargo package
