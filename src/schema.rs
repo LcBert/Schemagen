@@ -15,19 +15,13 @@ use crate::value::{Generator, Value};
 pub struct SchemaIter<'a> {
     fields: &'a mut [(String, Box<dyn Generator>)],
     rng: Box<dyn Rng>,
-    remaining: usize,
 }
 
 impl<'a> Iterator for SchemaIter<'a> {
     type Item = IndexMap<String, Value>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.remaining == 0 {
-            return None;
-        }
-
-        self.remaining -= 1;
-        let mut row = IndexMap::new();
+        let mut row = IndexMap::with_capacity(self.fields.len());
         for (name, generator) in self.fields.iter_mut() {
             let val = generator.next_value(&mut self.rng);
             row.insert(name.clone(), val);
@@ -37,11 +31,9 @@ impl<'a> Iterator for SchemaIter<'a> {
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.remaining, Some(self.remaining))
+        (usize::MAX, None)
     }
 }
-
-impl ExactSizeIterator for SchemaIter<'_> {}
 
 /// Schema definition containing fields and generation configuration.
 pub struct Schema {
@@ -105,7 +97,7 @@ impl Schema {
     }
 
     /// Returns a streaming [`SchemaIter`] that lazily produces `count` rows without collecting them all in memory.
-    pub fn iter(&mut self, count: usize) -> SchemaIter<'_> {
+    pub fn iter(&mut self) -> SchemaIter<'_> {
         let rng: Box<dyn Rng> = match self.seed {
             Some(seed) => Box::new(StdRng::seed_from_u64(seed)),
             None => Box::new(rand::rng()),
@@ -114,7 +106,6 @@ impl Schema {
         SchemaIter {
             fields: &mut self.fields,
             rng,
-            remaining: count,
         }
     }
 
@@ -132,7 +123,7 @@ impl Schema {
         let file = File::create(final_path)?;
         let mut writer = BufWriter::new(file);
 
-        for row in self.iter(count) {
+        for row in self.iter().take(count) {
             serde_json::to_writer(&mut writer, &row)
                 .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
             writer.write_all(b"\n")?;
@@ -162,7 +153,7 @@ impl Schema {
             writer.write_all(b"\n")?;
         }
 
-        for row in self.iter(count) {
+        for row in self.iter().take(count) {
             let mut first = true;
             for header in &headers {
                 if !first {
@@ -190,7 +181,6 @@ impl Schema {
         path: P,
         count: usize,
     ) -> io::Result<()> {
-
         let final_path = ensure_extension(path, "sql");
         let file = File::create(final_path)?;
         let mut writer = BufWriter::new(file);
@@ -199,7 +189,7 @@ impl Schema {
 
         let columns = headers.join(",");
 
-        for row in self.iter(count) {
+        for row in self.iter().take(count) {
             let mut values: Vec<String> = Vec::new();
             for header in &headers {
                 if let Some(val) = row.get(header) {

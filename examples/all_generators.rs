@@ -52,5 +52,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let generated = schema.generate_json(1)?;
     print!("{generated}");
 
+    // Write jsonl
+    schema.write_jsonl("products", 100)?;
+
+    // Write csv
+    schema.write_csv("products", 100, true)?;
+
+    // Write sql
+    schema.write_sql("table", "products", 100)?;
+
     Ok(())
 }
