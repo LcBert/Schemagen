@@ -32,6 +32,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let time = Field::time("00:00:00", "23:59:59");
 
+    let optional_int = Field::optiona_null(Field::range_int(1, 100), 0.5);
+
     // Fill Schema with desired Fields
     let mut schema = Schema::new()
         .with_seed(12345)
@@ -46,20 +48,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_field("uuid_v7", uuid_v7)
         .add_field("datetime", datetime)
         .add_field("date", date)
-        .add_field("time", time);
+        .add_field("time", time)
+        .add_field("optional_int", optional_int);
 
     // Generate json
-    let generated = schema.generate_json(1)?;
+    let generated = schema.generate_json(10)?;
     print!("{generated}");
 
     // Write jsonl
-    schema.write_jsonl("products", 100)?;
+    // schema.write_jsonl("products", 100)?;
 
     // Write csv
-    schema.write_csv("products", 100, true)?;
+    // schema.write_csv("products", 100, true)?;
 
     // Write sql
-    schema.write_sql("table", "products", 100)?;
+    // schema.write_sql("table", "products", 100)?;
 
     Ok(())
 }

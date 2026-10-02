@@ -1,21 +1,29 @@
 //! Field factory functions for instantiating generators.
 
-use crate::r#gen::{
-    check::Check,
-    choice::Choice,
-    datetime::Datetime,
-    pattern::Pattern,
-    range_float::RangeFloat,
-    range_int::RangeInt,
-    sequential::Sequential,
-    sequential_float::SequentialFloat,
-    uuid_gen::{UuidGen, UuidVersion},
+use crate::{
+    r#gen::{
+        check::Check,
+        choice::Choice,
+        datetime::Datetime,
+        optional_null::OptionalNull,
+        pattern::Pattern,
+        range_float::RangeFloat,
+        range_int::RangeInt,
+        sequential::Sequential,
+        sequential_float::SequentialFloat,
+        uuid_gen::{UuidGen, UuidVersion},
+    },
+    value::Generator,
 };
 
 /// Factory utility for constructing data generators.
 pub struct Field;
 
 impl Field {
+    pub fn optiona_null<G: Generator + 'static>(generator: G, chance: f32) -> OptionalNull<G> {
+        OptionalNull::new(generator, chance)
+    }
+
     /// Creates a generator that produces uniform random integers within `[min, max]`.
     ///
     /// # Panics
