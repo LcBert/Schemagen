@@ -14,7 +14,19 @@ enum Step {
 /// Generator producing strings by substituting configurable placeholder characters in a template.
 ///
 /// Placeholders are configured using [`Pattern::add_entry`]. Any character without a configured
-/// entry is preserved verbatim.
+/// entry is preserved verbatim. This is useful for generating formatted IDs, codes, or structured strings.
+///
+/// # Example
+///
+/// ```no_run
+/// use schemagen::{field::Field, schema::Schema};
+///
+/// let mut schema = Schema::new()
+///     .add_field("product_id", Field::pattern("PRD-####-????")
+///         .add_entry('#', vec!['0'..='9'])?
+///         .add_entry('?', vec!['A'..='Z'])?);
+/// # Ok::<(), Box<dyn std::error::Error>>(())
+/// ```
 pub struct Pattern {
     template: String,
     rules: HashMap<char, Vec<char>>,
@@ -23,6 +35,18 @@ pub struct Pattern {
 
 impl Pattern {
     /// Creates a new [`Pattern`] generator with the specified template string and no placeholder rules.
+    ///
+    /// # Arguments
+    ///
+    /// * `template` - The template string with placeholder characters to be substituted.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use schemagen::r#gen::pattern::Pattern;
+    ///
+    /// let generator = Pattern::new("USER-####");
+    /// ```
     pub fn new(template: impl Into<String>) -> Self {
         Self {
             template: template.into(),
@@ -33,9 +57,25 @@ impl Pattern {
 
     /// Registers allowed character ranges for a specific placeholder character.
     ///
+    /// # Arguments
+    ///
+    /// * `placeholder` - The character in the template to be replaced.
+    /// * `ranges` - A vector of character ranges to randomly select from for this placeholder.
+    ///
     /// # Errors
     ///
-    /// Returns `Err(String)` if `ranges` is empty or contains a wrong `RangeInclusive<char>`.
+    /// Returns `Err(String)` if `ranges` is empty or contains an invalid `RangeInclusive<char>`.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use schemagen::r#gen::pattern::Pattern;
+    ///
+    /// let generator = Pattern::new("ID-##-??")
+    ///     .add_entry('#', vec!['0'..='9'])?           // # becomes a digit
+    ///     .add_entry('?', vec!['A'..='Z', 'a'..='z'])?; // ? becomes a letter
+    /// # Ok::<(), String>(())
+    /// ```
     pub fn add_entry(
         mut self,
         placeholder: char,

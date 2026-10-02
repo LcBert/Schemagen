@@ -5,6 +5,18 @@ use rand::RngExt;
 use crate::value::{Generator, Value};
 
 /// Generator producing random boolean values (`true` or `false`) with a 50/50 distribution.
+///
+/// This generator is useful for creating random flags, checkboxes, or binary states.
+///
+/// # Example
+///
+/// ```no_run
+/// use schemagen::{field::Field, schema::Schema};
+///
+/// let mut schema = Schema::new()
+///     .add_field("is_active", Field::check())
+///     .add_field("has_permission", Field::check());
+/// ```
 #[derive(Default)]
 pub struct Check {}
 

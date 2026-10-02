@@ -3,7 +3,8 @@
 use schemagen::{field::Field, schema::Schema, value::Value};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut schema = Schema::new().add_field("price", Field::range_float(1.0, 100.0, Some(2)));
+    let range_float_field = Field::range_float(1.0, 100.0, Some(2));
+    let mut schema = Schema::new().add_field("price", range_float_field);
 
     // Use iter
     let sum = schema
@@ -17,8 +18,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("{sum:.2}");
 
-    let mut schema =
-        Schema::new().add_field("id", Field::pattern("###").add_entry('#', vec!['0'..='9'])?);
+    let pattern_field = Field::pattern("###").add_entry('#', vec!['0'..='9'])?;
+    let mut schema = Schema::new().add_field("id", pattern_field);
 
     let iterator = schema
         .iter()

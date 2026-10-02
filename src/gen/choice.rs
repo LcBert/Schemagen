@@ -5,6 +5,19 @@ use rand::seq::IndexedRandom;
 use crate::value::{Generator, Value};
 
 /// Generator selecting a random string from a list of predefined options.
+///
+/// Each call selects uniformly at random from the provided options, making it useful
+/// for generating categorical data like status values, product categories, or names.
+///
+/// # Example
+///
+/// ```no_run
+/// use schemagen::{field::Field, schema::Schema};
+///
+/// let mut schema = Schema::new()
+///     .add_field("status", Field::choice(vec!["Active", "Inactive", "Pending"]))
+///     .add_field("category", Field::choice(vec!["Electronics", "Clothing", "Books"]));
+/// ```
 pub struct Choice {
     options: Vec<String>,
 }
@@ -12,9 +25,25 @@ pub struct Choice {
 impl Choice {
     /// Creates a new [`Choice`] generator with the provided options.
     ///
+    /// # Arguments
+    ///
+    /// * `options` - A vector of string options to choose from. Must not be empty.
+    ///
     /// # Panics
     ///
     /// Panics if `options` is empty.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use schemagen::r#gen::choice::Choice;
+    ///
+    /// let generator = Choice::new(vec![
+    ///     "Option A".to_string(),
+    ///     "Option B".to_string(),
+    ///     "Option C".to_string(),
+    /// ]);
+    /// ```
     pub fn new(options: Vec<String>) -> Self {
         assert!(!options.is_empty(), "Options cannot be empty");
         Self { options }

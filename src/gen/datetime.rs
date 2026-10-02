@@ -18,7 +18,23 @@ enum Mode {
 /// Generator producing random date, time, or datetime strings.
 ///
 /// Automatically detects whether the input corresponds to a full datetime,
-/// a date only, or a time only based on the provided format.
+/// a date only, or a time only based on the provided format. This is useful
+/// for generating timestamps, birth dates, appointment times, or any temporal data.
+///
+/// # Example
+///
+/// ```no_run
+/// use schemagen::{field::Field, schema::Schema};
+///
+/// let mut schema = Schema::new()
+///     .add_field("created_at", Field::datetime(
+///         "2024-01-01 00:00:00",
+///         "2024-12-31 23:59:59",
+///         "%Y-%m-%d %H:%M:%S"
+///     ))
+///     .add_field("birth_date", Field::date("1990-01-01", "2000-12-31"))
+///     .add_field("appointment_time", Field::time("09:00:00", "17:00:00"));
+/// ```
 pub struct Datetime {
     mode: Mode,
     date_format: String,
@@ -27,7 +43,13 @@ pub struct Datetime {
 impl Datetime {
     /// Creates a new [`Datetime`] generator by parsing `start` and `end` with `date_format`.
     ///
-    /// Supports:
+    /// # Arguments
+    ///
+    /// * `start` - The start boundary as a string (inclusive).
+    /// * `end` - The end boundary as a string (inclusive).
+    /// * `date_format` - The chrono format string to use for parsing and output.
+    ///
+    /// The generator automatically detects the type based on successful parsing:
     /// - Full date and time (e.g. `"2024-01-01 00:00:00"`, format `"%Y-%m-%d %H:%M:%S"`)
     /// - Date only (e.g. `"2024-01-01"`, format `"%Y-%m-%d"`)
     /// - Time only (e.g. `"08:00:00"`, format `"%H:%M:%S"`)
@@ -35,6 +57,25 @@ impl Datetime {
     /// # Panics
     ///
     /// Panics if `start` or `end` cannot be parsed with `date_format`, or if `start > end`.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use schemagen::r#gen::datetime::Datetime;
+    ///
+    /// // Full datetime
+    /// let generator = Datetime::new(
+    ///     "2024-01-01 00:00:00",
+    ///     "2024-12-31 23:59:59",
+    ///     "%Y-%m-%d %H:%M:%S"
+    /// );
+    ///
+    /// // Date only
+    /// let generator = Datetime::new("2024-01-01", "2024-12-31", "%Y-%m-%d");
+    ///
+    /// // Time only
+    /// let generator = Datetime::new("08:00:00", "18:00:00", "%H:%M:%S");
+    /// ```
     pub fn new(
         start: impl Into<String>,
         end: impl Into<String>,

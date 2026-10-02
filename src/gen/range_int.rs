@@ -5,6 +5,19 @@ use rand::RngExt;
 use crate::value::{Generator, Value};
 
 /// Generator producing uniform random integers in the range `[min, max]`.
+///
+/// Each call generates a random integer where both endpoints are inclusive.
+/// Useful for generating IDs, ages, quantities, or any discrete numeric values.
+///
+/// # Example
+///
+/// ```no_run
+/// use schemagen::{field::Field, schema::Schema};
+///
+/// let mut schema = Schema::new()
+///     .add_field("age", Field::range_int(18, 100))
+///     .add_field("quantity", Field::range_int(1, 1000));
+/// ```
 pub struct RangeInt {
     min: i64,
     max: i64,
@@ -13,9 +26,22 @@ pub struct RangeInt {
 impl RangeInt {
     /// Creates a new [`RangeInt`] generator.
     ///
+    /// # Arguments
+    ///
+    /// * `min` - Minimum value (inclusive).
+    /// * `max` - Maximum value (inclusive).
+    ///
     /// # Panics
     ///
     /// Panics if `min > max`.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use schemagen::r#gen::range_int::RangeInt;
+    ///
+    /// let generator = RangeInt::new(1, 100);
+    /// ```
     pub fn new(min: i64, max: i64) -> Self {
         assert!(min <= max, "min must be <= max");
         Self { min, max }

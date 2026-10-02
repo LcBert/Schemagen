@@ -6,6 +6,19 @@ use crate::value::{Generator, Value};
 
 /// Generator producing uniform random floating-point numbers in the range `[min, max]`,
 /// optionally rounded to a specific number of decimal places.
+///
+/// Each call generates a random float where both endpoints are inclusive.
+/// Useful for generating prices, coordinates, percentages, or any continuous numeric values.
+///
+/// # Example
+///
+/// ```no_run
+/// use schemagen::{field::Field, schema::Schema};
+///
+/// let mut schema = Schema::new()
+///     .add_field("price", Field::range_float(1.0, 100.0, Some(2)))
+///     .add_field("rating", Field::range_float(0.0, 5.0, Some(1)));
+/// ```
 pub struct RangeFloat {
     min: f64,
     max: f64,
@@ -15,9 +28,27 @@ pub struct RangeFloat {
 impl RangeFloat {
     /// Creates a new [`RangeFloat`] generator.
     ///
+    /// # Arguments
+    ///
+    /// * `min` - Minimum value (inclusive).
+    /// * `max` - Maximum value (inclusive).
+    /// * `decimals` - Optional number of decimal places to round to. If `None`, no rounding is applied.
+    ///
     /// # Panics
     ///
     /// Panics if `min > max`.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use schemagen::r#gen::range_float::RangeFloat;
+    ///
+    /// // Generate prices with 2 decimal places
+    /// let generator = RangeFloat::new(1.0, 100.0, Some(2));
+    ///
+    /// // Generate unrounded floats
+    /// let generator = RangeFloat::new(0.0, 1.0, None);
+    /// ```
     pub fn new(min: f64, max: f64, decimals: Option<u32>) -> Self {
         assert!(min <= max, "min must be <= max");
         Self { min, max, decimals }
