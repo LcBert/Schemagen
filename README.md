@@ -15,7 +15,7 @@ A fast and flexible fake/mock data generator library for Rust with JSON, JSONL, 
 - **Streaming & Exporting**:
   - In-memory batch generation (`generate_batch`, `generate_json`).
   - Streaming iterator (`iter`).
-  - Direct file export (`write_jsonl`, `write_csv`).
+  - Direct file export (`write_jsonl`, `write_csv`, `write_sql`).
 - **Reproducibility**: Set seeds via `.with_seed(seed)` for deterministic output.
 
 ## License
