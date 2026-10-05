@@ -34,6 +34,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let optional_int = Field::optional_value(Field::range_int(1, 100), 0.5);
 
+    let color_rgb = Field::color_rgb();
+
+    let color_hex = Field::color_hex();
+
     let array = Field::array()
         .add_generator(Field::range_int(1, 10))
         .add_generator(Field::range_float(1.0, 10.0, Some(2)))
@@ -63,6 +67,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_field("date", date)
         .add_field("time", time)
         .add_field("optional_int", optional_int)
+        .add_field("color_rgb", color_rgb)
+        .add_field("color_hex", color_hex)
         .add_field("array", array)
         .add_field("object", object);
 

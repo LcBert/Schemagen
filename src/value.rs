@@ -23,6 +23,7 @@ pub enum Value {
     Boolean(bool),
     /// Uuid value.
     Uuid(Uuid),
+    ColorRGB(u16, u16, u16),
     /// Array value containing multiple sub-values.
     Array(Vec<Value>),
     /// Object value with named fields.
@@ -45,6 +46,7 @@ impl Value {
                 }
             }
             Value::Uuid(v) => format!("'{v}'"),
+            Value::ColorRGB(r, g, b) => format!("RBG({r},{g},{b})"),
             Value::Array(v) => {
                 let items: Vec<String> = v.iter().map(|val| val.to_sql()).collect();
                 format!("ARRAY[{}]", items.join(", "))
@@ -67,6 +69,7 @@ impl std::fmt::Display for Value {
             Value::Text(v) => write!(f, "{v}"),
             Value::Boolean(v) => write!(f, "{v}",),
             Value::Uuid(v) => write!(f, "{v}"),
+            Value::ColorRGB(r, g, b) => writeln!(f, "rgb({r},{g},{b})"),
             Value::Array(v) => {
                 for val in v.iter() {
                     write!(f, "{val}")?;

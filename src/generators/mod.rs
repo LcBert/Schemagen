@@ -3,6 +3,8 @@
 pub mod array;
 pub mod check;
 pub mod choice;
+pub mod color_hex;
+pub mod color_rgb;
 pub mod datetime;
 pub mod object_gen;
 pub mod optional_value;

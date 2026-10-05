@@ -5,6 +5,8 @@ use crate::{
         array::Array,
         check::Check,
         choice::Choice,
+        color_hex::ColorHex,
+        color_rgb::ColorRgb,
         datetime::Datetime,
         object_gen::ObjectGen,
         optional_value::OptionalValue,
@@ -226,5 +228,11 @@ impl Field {
         ObjectGen::new()
     }
 
+    pub fn color_rgb() -> ColorRgb {
+        ColorRgb {}
+    }
 
+    pub fn color_hex() -> ColorHex {
+        ColorHex::new()
+    }
 }
