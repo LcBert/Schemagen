@@ -8,6 +8,8 @@ use crate::{
         color_hex::ColorHex,
         color_rgb::ColorRgb,
         datetime::Datetime,
+        gaussian_float::GaussianFloat,
+        gaussian_int::GaussianInt,
         object_gen::ObjectGen,
         optional_value::OptionalValue,
         pattern::Pattern,
@@ -67,6 +69,16 @@ impl Field {
     /// Panics if `min > max`.
     pub fn range_float(min: f64, max: f64, decimals: Option<u32>) -> RangeFloat {
         RangeFloat::new(min, max, decimals)
+    }
+
+    ///
+    pub fn gaussian_int(mu: f64, sigma: f64) -> GaussianInt {
+        GaussianInt::new(mu, sigma)
+    }
+
+    ///
+    pub fn gaussian_float(mu: f64, sigma: f64, decimals: Option<u32>) -> GaussianFloat {
+        GaussianFloat::new(mu, sigma, decimals)
     }
 
     /// Creates a customizable template-based string generator.

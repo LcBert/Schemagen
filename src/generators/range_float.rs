@@ -2,7 +2,10 @@
 
 use rand::RngExt;
 
-use crate::value::{Generator, Value};
+use crate::{
+    utils::round_float,
+    value::{Generator, Value},
+};
 
 /// Generator producing uniform random floating-point numbers within a specified range.
 ///
@@ -129,17 +132,9 @@ impl RangeFloat {
 impl Generator for RangeFloat {
     fn next_value(&mut self, rng: &mut dyn rand::prelude::Rng) -> Value {
         let raw_val = rng.random_range(self.min..=self.max);
-        let final_val = match self.decimals {
-            Some(places) => {
-                let factor = 10_f64.powi(places as i32);
-                (raw_val * factor).round() / factor
-            }
-            None => raw_val,
-        };
-        Value::Float(final_val)
+        Value::Float(round_float(raw_val, self.decimals))
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -187,4 +182,3 @@ mod tests {
         RangeFloat::new(10.0, 1.0, None);
     }
 }
-

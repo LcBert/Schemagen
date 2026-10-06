@@ -1,6 +1,9 @@
 //! Sequential floating-point generator.
 
-use crate::value::{Generator, Value};
+use crate::{
+    utils::round_float,
+    value::{Generator, Value},
+};
 
 /// Generator producing deterministic floating-point sequences with a fixed step.
 ///
@@ -122,20 +125,11 @@ impl SequentialFloat {
     }
 }
 
-
 impl Generator for SequentialFloat {
     fn next_value(&mut self, _rng: &mut dyn rand::prelude::Rng) -> Value {
         let raw_val = self.current;
         self.current += self.step;
-
-        let final_val = match self.decimals {
-            Some(places)=>{
-                let factor =10_f64.powi(places as i32);
-                (raw_val*factor).round()/factor
-            }
-            None=>raw_val,
-        };
-        Value::Float(final_val)
+        Value::Float(round_float(raw_val, self.decimals))
     }
 }
 
@@ -172,4 +166,3 @@ mod tests {
         assert_eq!(generator.next_value(&mut rng), Value::Float(9.0));
     }
 }
-

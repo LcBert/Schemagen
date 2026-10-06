@@ -10,6 +10,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let range_float = Field::range_float(1.0, 100.0, Some(2));
 
+    let gaussian_int = Field::gaussian_int(5.0, 2.0);
+
+    let gaussian_float = Field::gaussian_float(5.0, 2.0, Some(2));
+
     let pattern = Field::pattern("PRD-####-????")
         .add_entry('#', vec!['1'..='9'])
         .add_entry('?', vec!['a'..='z', 'A'..='Z']);
@@ -58,6 +62,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_field("sequential_float", sequential_float)
         .add_field("int", range_int)
         .add_field("float", range_float)
+        .add_field("gaussian_int", gaussian_int)
+        .add_field("gaussian_float", gaussian_float)
         .add_field("pattern", pattern)
         .add_field("choice", choice)
         .add_field("check", check)

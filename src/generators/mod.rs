@@ -6,6 +6,8 @@ pub mod choice;
 pub mod color_hex;
 pub mod color_rgb;
 pub mod datetime;
+pub mod gaussian_float;
+pub mod gaussian_int;
 pub mod object_gen;
 pub mod optional_value;
 pub mod pattern;

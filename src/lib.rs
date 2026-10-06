@@ -45,6 +45,8 @@
 //!   - Direct file export (`write_jsonl`, `write_csv`, `write_sql`)
 //! - **Reproducibility**: Set seeds via `.with_seed(seed)` for deterministic output
 
+mod utils;
+
 pub mod field;
 pub mod generators;
 pub mod schema;
