@@ -229,7 +229,7 @@ impl Field {
     }
 
     pub fn color_rgb() -> ColorRgb {
-        ColorRgb {}
+        ColorRgb::new()
     }
 
     pub fn color_hex() -> ColorHex {

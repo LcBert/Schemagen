@@ -33,7 +33,7 @@ use schemagen::{field::Field, schema::Schema};
 let mut schema = Schema::new()
     .with_seed(12345)
     .add_field("id", Field::sequential(1, 1))
-    .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']).unwrap())
+    .add_field("name", Field::pattern("USR-####").add_entry('#', vec!['0'..='9']))
     .add_field("price", Field::range_float(1.0, 100.0, Some(2)))
     .add_field("is_active", Field::check())
     .add_field("uuid", Field::uuid_v4())
