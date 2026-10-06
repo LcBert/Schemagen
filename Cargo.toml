@@ -1,6 +1,6 @@
 [package]
 name = "schemagen"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 authors = ["LcBert <luca.bertaggia82@gmail.com>"]
 description = "A fast and flexible fake/mock data generator library for Rust with JSON, JSONL, CSV, and SQL export support."
