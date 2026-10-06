@@ -23,6 +23,7 @@ pub enum Value {
     Boolean(bool),
     /// Uuid value.
     Uuid(Uuid),
+    // ColorRBG value.
     ColorRGB(u16, u16, u16),
     /// Array value containing multiple sub-values.
     Array(Vec<Value>),

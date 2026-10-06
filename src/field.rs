@@ -220,18 +220,76 @@ impl Field {
         OptionalValue::new(generator, chance)
     }
 
+    /// Creates an array generator that combines multiple generators.
+    ///
+    /// The array generator runs multiple generators in sequence and collects their outputs
+    /// into a single array. Use [`add_generator`](crate::generators::array::Array::add_generator)
+    /// to add generators to the array.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use schemagen::{field::Field, schema::Schema};
+    ///
+    /// let mut schema = Schema::new()
+    ///     .add_field("tags", Field::array()
+    ///         .add_generator(Field::choice(vec!["tag1", "tag2", "tag3"]))
+    ///         .add_generator(Field::choice(vec!["tag4", "tag5", "tag6"])));
+    /// ```
     pub fn array() -> Array {
         Array::new()
     }
 
+    /// Creates an object generator for nested structured data.
+    ///
+    /// The object generator creates JSON-like objects with named fields. Use
+    /// [`add_field`](crate::generators::object_gen::ObjectGen::add_field) to add fields
+    /// to the object.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use schemagen::{field::Field, schema::Schema};
+    ///
+    /// let mut schema = Schema::new()
+    ///     .add_field("metadata", Field::object()
+    ///         .add_field("id", Field::range_int(1, 1000))
+    ///         .add_field("status", Field::choice(vec!["active", "inactive"])));
+    /// ```
     pub fn object() -> ObjectGen {
         ObjectGen::new()
     }
 
+    /// Creates a generator that produces random RGB color values.
+    ///
+    /// Each color consists of red, green, and blue components ranging from 0 to 255.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use schemagen::{field::Field, schema::Schema};
+    ///
+    /// let mut schema = Schema::new()
+    ///     .add_field("theme_color", Field::color_rgb())
+    ///     .add_field("background", Field::color_rgb());
+    /// ```
     pub fn color_rgb() -> ColorRgb {
         ColorRgb::new()
     }
 
+    /// Creates a generator that produces random hexadecimal color codes.
+    ///
+    /// Each color code is in the format `#RRGGBB` where each component is a hexadecimal digit.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use schemagen::{field::Field, schema::Schema};
+    ///
+    /// let mut schema = Schema::new()
+    ///     .add_field("primary_color", Field::color_hex())
+    ///     .add_field("accent_color", Field::color_hex());
+    /// ```
     pub fn color_hex() -> ColorHex {
         ColorHex::new()
     }
